@@ -111,6 +111,7 @@ Verificació que el client Windows ha rebut la IP 192.168.60.31 del servidor DHC
 #### Pas 7: Comprovació del fitxer de leases
 
 Comprovació del fitxer de leases que mostra l'assignació d'IP al client Windows (DESKTOP-JNU2BQU amb IP dinàmica).
+
 ![Fitxer leases DHCP](./Photos/Sprint%201/DHCP7.png)
 
 ---
