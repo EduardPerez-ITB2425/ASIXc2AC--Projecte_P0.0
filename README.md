@@ -28,6 +28,8 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 
 ## Arquitectura de Xarxa
 
+![Diagrama d'infraestructura](./Photos/estructura.png)
+
 ### Esquema d'IPs - Xarxa 192.168.6.X
 
 #### DMZ (192.168.6.10/24)
@@ -56,6 +58,64 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 - PC Windows
 - PC Linux
 
-![Descripció de la imatge](./Photos/estructura.png)
+---
+
+## Sprint 1 - Configuració Serveis de Xarxa
+
+### Configuració DHCP Server
+
+#### Pas 1: Instal·lació del servei DHCP
+
+![Instal·lació DHCP](./Sprint%201/DHCP1.png)
+
+Instal·lació del paquet `isc-dhcp-server` al servidor Ubuntu.
+
+**Comanda:**
+```bash
+sudo apt install isc-dhcp-server
+```
+
+---
+
+#### Pas 2: Configuració del fitxer dhcpd.conf
+
+Configuració del fitxer `/etc/dhcp/dhcpd.conf` amb el rang d'IPs (192.168.60.30-100), gateway (192.168.60.1), DNS (8.8.8.8, 4.4.4.4) i reserva estàtica per adminPC (192.168.60.20).
+![Configuració dhcpd.conf](./Sprint%201/DHCP2.png)
+
+---
+
+#### Pas 3: Verificació de l'estat del servei
+
+Verificació que el servei DHCP està actiu i funcionant correctament (status active/running).
+![Estat servei DHCP](./Sprint%201/DHCP3.png)
+
+
+---
+
+#### Pas 4: Configuració client Ubuntu
+
+Configuració del client Ubuntu per obtenir IP automàticament via DHCP i DNS manual (192.168.60.20).
+![Configuració client Ubuntu](./Sprint%201/DHCP4.png)
+
+---
+
+#### Pas 5: Verificació IP assignada - Client Ubuntu
+
+Verificació que el client Ubuntu ha rebut la IP 192.168.60.30 del pool DHCP.
+![IP client Ubuntu](./Sprint%201/DHCP5.png)
+
+---
+
+#### Pas 6: Verificació IP assignada - Client Windows
+
+Verificació que el client Windows ha rebut la IP 192.168.60.31 del servidor DHCP amb gateway 192.168.60.1.
+![IP client Windows](./Sprint%201/DHCP6.png)
+
+---
+
+#### Pas 7: Comprovació del fitxer de leases
+
+Comprovació del fitxer de leases que mostra l'assignació d'IP al client Windows (DESKTOP-JNU2BQU amb IP dinàmica).
+![Fitxer leases DHCP](./Sprint%201/DHCP7.png)
 
 ---
