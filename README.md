@@ -66,14 +66,9 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 
 #### Pas 1: Instal·lació del servei DHCP
 
-![Instal·lació DHCP](./Sprint%201/DHCP1.png)
+![Instal·lació DHCP](./Photos/Sprint%201/DHCP1.png)
 
 Instal·lació del paquet `isc-dhcp-server` al servidor Ubuntu.
-
-**Comanda:**
-```bash
-sudo apt install isc-dhcp-server
-```
 
 ---
 
