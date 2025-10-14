@@ -75,6 +75,7 @@ Instal·lació del paquet `isc-dhcp-server` al servidor Ubuntu.
 #### Pas 2: Configuració del fitxer dhcpd.conf
 
 Configuració del fitxer `/etc/dhcp/dhcpd.conf` amb el rang d'IPs (192.168.60.30-100), gateway (192.168.60.1), DNS (8.8.8.8, 4.4.4.4) i reserva estàtica per adminPC (192.168.60.20).
+
 ![Configuració dhcpd.conf](./Photos/Sprint%201/DHCP2.png)
 
 ---
@@ -82,6 +83,7 @@ Configuració del fitxer `/etc/dhcp/dhcpd.conf` amb el rang d'IPs (192.168.60.30
 #### Pas 3: Verificació de l'estat del servei
 
 Verificació que el servei DHCP està actiu i funcionant correctament (status active/running).
+
 ![Estat servei DHCP](./Photos/Sprint%201/DHCP3.png)
 
 
@@ -90,6 +92,7 @@ Verificació que el servei DHCP està actiu i funcionant correctament (status ac
 #### Pas 4: Configuració client Ubuntu
 
 Configuració del client Ubuntu per obtenir IP automàticament via DHCP i DNS manual (192.168.60.20).
+
 ![Configuració client Ubuntu](./Photos/Sprint%201/DHCP4.png)
 
 ---
@@ -97,6 +100,7 @@ Configuració del client Ubuntu per obtenir IP automàticament via DHCP i DNS ma
 #### Pas 5: Verificació IP assignada - Client Ubuntu
 
 Verificació que el client Ubuntu ha rebut la IP 192.168.60.30 del pool DHCP.
+
 ![IP client Ubuntu](./Photos/Sprint%201/DHCP5.png)
 
 ---
@@ -104,6 +108,7 @@ Verificació que el client Ubuntu ha rebut la IP 192.168.60.30 del pool DHCP.
 #### Pas 6: Verificació IP assignada - Client Windows
 
 Verificació que el client Windows ha rebut la IP 192.168.60.31 del servidor DHCP amb gateway 192.168.60.1.
+
 ![IP client Windows](./Photos/Sprint%201/DHCP6.png)
 
 ---
