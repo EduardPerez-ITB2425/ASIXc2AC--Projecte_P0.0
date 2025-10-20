@@ -1,0 +1,19 @@
+# Configuració DHCP Server
+
+## 1. Fitxer /etc/dhcp/dhcpd.conf
+```bash
+subnet 192.168.60.0 netmask 255.255.255.0 {
+    range 192.168.60.30 192.168.60.100;
+    option routers 192.168.60.1;
+    option subnet-mask 255.255.255.0;
+    option domain-name-servers 8.8.8.8 4.4.4.4;
+    option domain-name "D-N03";
+}
+
+host adminPC {
+    hardware ethernet 52:54:00:5a:73:f9;
+    fixed-address 192.168.60.20;
+}
+```
+
+---
