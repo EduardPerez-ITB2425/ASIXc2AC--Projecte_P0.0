@@ -62,6 +62,100 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 
 ## Sprint 1 - Configuració Serveis de Xarxa
 
+### Configuració DNS Server (D-N03)
+
+#### Pas 1: Configuració de la interfície de xarxa
+
+Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la configuració de la interfície enp3s0 del servidor DNS amb IP estàtica 192.168.6.20/24, gateway 192.168.6.1 i servidors DNS externs (8.8.8.8 i 8.8.4.4).
+
+![Configuració Netplan DNS](./Photos/Sprint%201/DNS1.png)
+
+---
+
+#### Pas 2: Creació de l'usuari bchecker
+
+Creació de l'usuari `bchecker` amb el grup bchecker (1001) mitjançant la comanda `sudo adduser bchecker`. Es configura el directori personal i la contrasenya per complir amb els requisits del projecte.
+
+![Creació usuari bchecker](./Photos/Sprint%201/DNS2.png)
+
+---
+
+#### Pas 3: Configuració del fitxer named.conf.options
+
+Visualització del fitxer `/etc/bind/named.conf.options` amb la configuració del servidor BIND9:
+- Directori de caché: `/var/cache/bind`
+- Permet consultes de qualsevol origen
+- Recursió habilitada
+- Escolta en el port 53
+- Forwarders configurats (8.8.8.8 i 8.8.4.4)
+- DNSSEC validation en mode auto
+
+![Configuració named.conf.options](./Photos/Sprint%201/DNS3.png)
+
+---
+
+#### Pas 4: Configuració del fitxer named.conf.local
+
+Visualització del fitxer `/etc/bind/named.conf.local` amb la definició de les zones DNS:
+- **Zona directa "grup6.itb.cat":** Tipus master amb fitxer `/etc/bind/db.grup6.itb.cat`
+- **Zona inversa "60.168.192.in-addr.arpa":** Tipus master amb fitxer `/etc/bind/db.192.168.60`
+
+![Configuració named.conf.local](./Photos/Sprint%201/DNS4.png)
+
+---
+
+#### Pas 5: Fitxer de zona directa db.grup6.itb.cat
+
+Contingut del fitxer `/etc/bind/db.grup6.itb.cat` amb els registres DNS:
+- **SOA:** DN-03.grup6.itb.cat amb admin.grup6.itb.cat
+- **NS:** Servidor de noms DN-03
+- **A:** Registre que apunta DN-03 a la IP 192.168.60.20
+
+![Zona directa grup6.itb.cat](./Photos/Sprint%201/DNS5.png)
+
+---
+
+#### Pas 6: Fitxer de zona inversa db.192.168.60
+
+Contingut del fitxer `/etc/bind/db.192.168.60` amb els registres de resolució inversa:
+- **SOA:** Configuració idèntica a la zona directa
+- **NS:** Servidor de noms DN-03
+- **PTR:** Registre que apunta 20 (192.168.60.20) a DN-03.grup6.itb.cat
+
+![Zona inversa 192.168.60](./Photos/Sprint%201/DNS6.png)
+
+---
+
+#### Pas 7: Verificació del fitxer de zona inversa
+
+Comprovació addicional del contingut del fitxer `/etc/bind/db.192.168.60` confirmant la correcta configuració dels registres PTR per a la resolució inversa.
+
+![Verificació zona inversa](./Photos/Sprint%201/DNS7.png)
+
+---
+
+#### Pas 8: Configuració del fitxer named.conf principal
+
+Visualització del fitxer `/etc/bind/named.conf` que inclou els fitxers de configuració principals:
+- `/etc/bind/named.conf.options`
+- `/etc/bind/named.conf.local`
+- `/etc/bind/named.conf.default-zones`
+
+Aquest és el fitxer principal que carrega tota la configuració del servidor BIND9.
+
+![Configuració named.conf](./Photos/Sprint%201/DNS8.png)
+
+---
+
+#### Pas 9: Verificació de l'estat del servei BIND9
+
+Comprovació amb `sudo systemctl status bind9` que el servei named.service està actiu i funcionant correctament (active/running). Es pot veure que el servei va arrencar correctament i està escoltant en les interfícies IPv6 enp4s0 i enp5s0.
+
+![Estat servei BIND9](./Photos/Sprint%201/DNS9.png)
+
+---
+
+
 ### Configuració DHCP Server
 
 #### Pas 1: Instal·lació del servei DHCP
