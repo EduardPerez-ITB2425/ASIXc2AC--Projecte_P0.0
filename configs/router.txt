@@ -1,0 +1,199 @@
+# Configuració Router R-N01
+
+## 1. Fitxer /etc/hosts
+
+Configuració del nom del router al sistema.
+```bash
+127.0.0.1       localhost
+127.0.1.1       R-N01
+```
+
+---
+
+## 2. Fitxer /etc/netplan/01-network-manager-all.yaml
+
+Configuració de les tres interfícies de xarxa del router:
+- **enp1s0:** NAT (DHCP) - Sortida a Internet
+- **enp2s0:** DMZ (192.168.6.1/24)
+- **enp3s0:** Intranet (192.168.60.1/24)
+```yaml
+# Let NetworkManager manage all devices on this system
+network:
+  version: 2
+  ethernets:
+    enp1s0:
+      match:
+        macaddress: 52:54:00:34:64:69
+      dhcp4: true
+      optional: true
+    enp2s0:
+      match:
+        macaddress: 52:54:00:38:57:0d
+      addresses:
+        - 192.168.6.1/24      # DMZ
+    enp3s0:
+      match:
+        macaddress: 52:54:00:1d:14:5e
+      addresses:
+        - 192.168.60.1/24     # Intranet
+```
+
+---
+
+## 3. Configuració iptables
+
+Script amb totes les regles de firewall i enrutament del router.
+
+### Polítiques per defecte
+```bash
+# Política per defecte: DROP en FORWARD
+sudo iptables -P FORWARD DROP
+```
+
+### NAT - Sortida a Internet
+```bash
+# Configurar MASQUERADE per sortida a Internet
+sudo iptables -t nat -A POSTROUTING -o enp1s0 -j MASQUERADE
+```
+
+### Regles INTERNET ↔ DMZ
+```bash
+# Permetre tràfic establert/relacionat des d'Internet cap a DMZ
+sudo iptables -A FORWARD -i enp1s0 -o enp2s0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Permetre tràfic des de DMZ cap a Internet
+sudo iptables -A FORWARD -i enp2s0 -o enp1s0 -j ACCEPT
+```
+
+### Regles INTERNET ↔ INTRANET
+```bash
+# Permetre tràfic establert/relacionat des d'Internet cap a Intranet
+sudo iptables -A FORWARD -i enp1s0 -o enp3s0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Permetre tràfic des d'Intranet cap a Internet
+sudo iptables -A FORWARD -i enp3s0 -o enp1s0 -j ACCEPT
+```
+
+### Regles DMZ → INTRANET
+```bash
+# Permetre només connexió del Web Server (192.168.6.10) al servidor BBDD (192.168.60.20) port 3306
+sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -s 192.168.6.10 -d 192.168.60.20 -p tcp --dport 3306 -j ACCEPT
+
+# Denegar qualsevol altre tràfic de DMZ a Intranet
+sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -j DROP
+```
+
+### Regles INTRANET → DMZ
+```bash
+# Permetre que clients d'Intranet accedeixin a DMZ
+sudo iptables -A FORWARD -i enp3s0 -o enp2s0 -j ACCEPT
+```
+
+### Guardar configuració
+```bash
+# Guardar regles permanentment
+sudo iptables-save | sudo tee /etc/iptables/rules.v4
+```
+
+---
+
+## 4. Taula de rutes (ip route show)
+```
+default via 192.168.120.1 dev enp1s0 proto dhcp src 192.168.120.72 metric 100
+192.168.6.0/24 dev enp2s0 proto kernel scope link src 192.168.6.1
+192.168.60.0/24 dev enp3s0 proto kernel scope link src 192.168.60.1
+192.168.120.0/22 dev enp1s0 proto kernel scope link src 192.168.120.72
+192.168.120.0/22 dev enp1s0 proto kernel scope link src 192.168.120.72 metric 100
+192.168.120.1 dev enp2s0 proto dhcp scope link src 192.168.120.72 metric 100
+```
+
+---
+
+## 5. Verificació de regles iptables (iptables -L -n -v)
+
+### Chain INPUT
+```
+Chain INPUT (policy DROP 3063 packets, 804K bytes)
+pkts bytes target     prot opt in     out     source               destination
+```
+
+### Chain FORWARD
+```
+Chain FORWARD (policy DROP 0 packets, 0 bytes)
+pkts bytes target     prot opt in     out     source               destination         state
+    0     0 ACCEPT     all  --  enp1s0 enp2s0  0.0.0.0/0            0.0.0.0/0           RELATED,ESTABLISHED
+    0     0 ACCEPT     all  --  enp2s0 enp1s0  0.0.0.0/0            0.0.0.0/0
+   10  1304 ACCEPT     all  --  enp1s0 enp3s0  0.0.0.0/0            0.0.0.0/0           RELATED,ESTABLISHED
+   14  1408 ACCEPT     all  --  enp3s0 enp1s0  0.0.0.0/0            0.0.0.0/0
+    0     0 ACCEPT     tcp  --  enp2s0 enp3s0  192.168.6.10         192.168.60.20       tcp dpt:3306
+    0     0 DROP       all  --  enp2s0 enp3s0  0.0.0.0/0            0.0.0.0/0
+    0     0 ACCEPT     all  --  enp3s0 enp2s0  0.0.0.0/0            0.0.0.0/0
+```
+
+### Chain OUTPUT
+```
+Chain OUTPUT (policy ACCEPT 2075 packets, 165K bytes)
+pkts bytes target     prot opt in     out     source               destination
+```
+
+### Chain PREROUTING (NAT)
+```
+Chain PREROUTING (policy ACCEPT 3870 packets, 937K bytes)
+pkts bytes target     prot opt in     out     source               destination
+```
+
+### Chain POSTROUTING (NAT)
+```
+Chain POSTROUTING (policy ACCEPT 280 packets, 24312 bytes)
+pkts bytes target     prot opt in     out     source               destination
+   20  2532 MASQUERADE all  --  *      enp1s0  0.0.0.0/0            0.0.0.0/0
+```
+
+---
+
+## 6. Proves de connectivitat
+
+Verificació de connectivitat des del router cap als servidors de la xarxa Intranet:
+
+### Ping al servidor DNS (192.168.60.20)
+```
+PING 192.168.60.20 (192.168.60.20) 56(84) bytes of data.
+64 bytes from 192.168.60.20: icmp_seq=1 ttl=64 time=1.55 ms
+64 bytes from 192.168.60.20: icmp_seq=2 ttl=64 time=0.349 ms
+64 bytes from 192.168.60.20: icmp_seq=3 ttl=64 time=0.464 ms
+64 bytes from 192.168.60.20: icmp_seq=4 ttl=64 time=0.384 ms
+
+--- 192.168.60.20 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3039ms
+rtt min/avg/max/mdev = 0.349/0.685/1.545/0.497 ms
+```
+
+### Ping al client Ubuntu (192.168.60.30)
+```
+PING 192.168.60.30 (192.168.60.30) 56(84) bytes of data.
+64 bytes from 192.168.60.30: icmp_seq=1 ttl=64 time=1.64 ms
+64 bytes from 192.168.60.30: icmp_seq=2 ttl=64 time=0.386 ms
+64 bytes from 192.168.60.30: icmp_seq=3 ttl=64 time=0.308 ms
+64 bytes from 192.168.60.30: icmp_seq=4 ttl=64 time=0.351 ms
+
+--- 192.168.60.30 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3046ms
+rtt min/avg/max/mdev = 0.308/0.671/1.642/0.560 ms
+```
+
+### Ping al client Windows (192.168.60.31)
+```
+PING 192.168.60.31 (192.168.60.31) 56(84) bytes of data.
+64 bytes from 192.168.60.31: icmp_seq=1 ttl=128 time=1.65 ms
+64 bytes from 192.168.60.31: icmp_seq=2 ttl=128 time=0.583 ms
+64 bytes from 192.168.60.31: icmp_seq=3 ttl=128 time=0.500 ms
+64 bytes from 192.168.60.31: icmp_seq=4 ttl=128 time=0.452 ms
+
+--- 192.168.60.31 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3034ms
+rtt min/avg/max/mdev = 0.452/0.795/1.648/0.494 ms
+```
+
+**Resultat:** Totes les proves de connectivitat mostren 0% packet loss, confirmant la correcta configuració del router i les regles d'enrutament.
+
+---
