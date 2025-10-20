@@ -120,3 +120,75 @@ Comprovació del fitxer de leases que mostra l'assignació d'IP al client Window
 ![Fitxer leases DHCP](./Photos/Sprint%201/DHCP7.png)
 
 ---
+
+
+### Configuració Router R-N01
+
+#### Pas 1: Pantalla d'inici de sessió
+
+Pantalla d'inici de sessió del sistema Ubuntu Server amb els usuaris isardVDI, Grup6 i bchecker disponibles per accedir al router.
+
+![Pantalla inici Router](./Photos/Sprint%201/R1.png)
+
+---
+
+#### Pas 2: Configuració del fitxer /etc/hosts
+
+Edició del fitxer `/etc/hosts` assignant el nom "R-N01" al localhost (127.0.1.1) per identificar correctament el router a la xarxa.
+
+![Configuració hosts](./Photos/Sprint%201/R2.png)
+
+---
+
+#### Pas 3: Configuració de les interfícies de xarxa
+
+Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la configuració de les 3 interfícies del router:
+- **enp1s0:** NAT amb DHCP (52:54:00:34:64:69)
+- **enp2s0:** DMZ amb IP 192.168.6.1/24 (52:54:00:38:57:0d)
+- **enp3s0:** Intranet amb IP 192.168.60.1/24 (52:54:00:1d:14:5e)
+
+![Configuració Netplan](./Photos/Sprint%201/R3.png)
+
+---
+
+#### Pas 4: Verificació de les interfícies actives
+
+Comprovació amb `ip a` de l'estat de totes les interfícies de xarxa del router. Es poden veure les tres interfícies configurades i actives amb les seves respectives adreces IP i MAC.
+
+![Estat interfícies](./Photos/Sprint%201/R4.png)
+
+---
+
+#### Pas 5: Configuració de les regles d'iptables
+
+Configuració completa de les regles d'iptables per gestionar el tràfic entre les xarxes:
+- **NAT:** Configuració de MASQUERADE per sortida a Internet
+- **FORWARD:** Regles per permetre tràfic entre DMZ ↔ Internet i Intranet ↔ DMZ
+- **Port Forwarding:** Redirecció del port 3306 de DMZ a Intranet (192.168.6.10 → 192.168.60.20)
+
+Les regles es guarden amb `iptables-save` al fitxer `/etc/iptables/rules.v4`.
+
+![Regles iptables](./Photos/Sprint%201/R5.png)
+
+---
+
+#### Pas 6: Verificació de les taules de rutes i iptables
+
+Comprovació amb `ip route show` de les rutes configurades i verificació amb `iptables -L -n -v` de totes les cadenes (INPUT, FORWARD, OUTPUT, PREROUTING, POSTROUTING) amb les regles actives i estadístiques de paquets processats.
+
+![Taules de rutes i verificació](./Photos/Sprint%201/R6.png)
+
+---
+
+#### Pas 7: Proves de connectivitat
+
+Proves de ping des del router cap als servidors de la xarxa Intranet:
+- **192.168.60.20:** Servidor de Base de Dades (B-N03) - Connectivitat correcta
+- **192.168.60.30:** Client Ubuntu amb IP DHCP - Connectivitat correcta  
+- **192.168.60.31:** Client Windows amb IP DHCP - Connectivitat correcta
+
+Totes les proves mostren 0% packet loss confirmant la correcta configuració del router.
+
+![Proves connectivitat](./Photos/Sprint%201/R7.png)
+
+---
