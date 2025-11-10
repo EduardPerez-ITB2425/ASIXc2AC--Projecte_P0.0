@@ -28,7 +28,7 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 
 ## Arquitectura de Xarxa
 
-![Diagrama d'infraestructura](./Photos/estructura.png)
+![Diagrama d'infraestructura](./Photos/Sprint%201/estructura.png)
 
 ### Esquema d'IPs - Xarxa 192.168.6.X
 
