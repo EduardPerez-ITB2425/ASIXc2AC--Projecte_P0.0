@@ -37,7 +37,7 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 - **F-NCC (FTP Server):** 192.168.6.11
 
 #### Intranet (192.168.60.20/24)
-- **B-NCC (Database Server):** 192.168.60.20
+- **B-NCC (Database Server):** 192.168.60.15
 - **DHCP Server:** 192.168.60.21
 - **DNS Server:** 192.168.60.22
 - **Pool DHCP:** 192.168.60.30-100
@@ -57,6 +57,127 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 ### Clients
 - PC Windows
 - PC Linux
+---
+
+## P0.2/PF: Plan de Prevención de Riesgos Laborales (RA3)
+
+### Identificació de Riscos del Projecte
+
+#### Riscos Tècnics
+
+**1. Fallada en la configuració de xarxa**
+- **Descripció:** Error en la configuració d'IPs, màscares o routing que impedeixi la comunicació entre xarxes
+- **Probabilitat:** Mitjana
+- **Impacte:** Alt
+- **Prevenció:** 
+  - Documentar totes les configuracions abans d'aplicar-les
+  - Realitzar proves de connectivitat després de cada canvi
+  - Mantenir backup de les configuracions funcionals
+
+**2. Vulnerabilitats de seguretat**
+- **Descripció:** Exposició de serveis crítics (DB, SSH, FTP) sense mesures de seguretat adequades
+- **Probabilitat:** Alta
+- **Impacte:** Crític
+- **Prevenció:**
+  - Configurar firewalls (iptables) correctament
+  - Utilitzar contrasenyes fortes
+  - Mantenir serveis actualitzats
+  - Implementar separació de xarxes (DMZ/Intranet)
+
+**3. Pèrdua de dades**
+- **Descripció:** Pèrdua d'informació de configuració o base de dades
+- **Probabilitat:** Baixa
+- **Impacte:** Alt
+- **Prevenció:**
+  - Realitzar backups periòdics
+  - Utilitzar control de versions (Git) per configuracions
+  - Documentar tots els canvis realitzats
+
+#### Riscos d'Organització
+
+**4. Retards en el calendari**
+- **Descripció:** No complir amb els terminis establerts per cada sprint
+- **Probabilitat:** Mitjana
+- **Impacte:** Mitjà
+- **Prevenció:**
+  - Planificació realista de tasques en ProofHub
+  - Reunions de seguiment setmanals
+  - Identificació primerenca de blocatges
+
+**5. Manca de coordinació entre membres**
+- **Descripció:** Duplicació de tasques o configuracions incompatibles
+- **Probabilitat:** Mitjana
+- **Impacte:** Mitjà
+- **Prevenció:**
+  - Assignació clara de responsabilitats
+  - Comunicació constant via ProofHub
+  - Documentació compartida i actualitzada
+
+#### Riscos de Salut i Seguretat (PRL)
+
+**6. Fatiga visual i postural**
+- **Descripció:** Problemes derivats de llargues sessions davant l'ordinador
+- **Probabilitat:** Alta
+- **Impacte:** Baix
+- **Prevenció:**
+  - Pauses cada 50 minuts de treball
+  - Ergonomia adequada del lloc de treball
+  - Il·luminació correcta
+
+**7. Estrés per càrrega de treball**
+- **Descripció:** Sobrecàrrega durant els sprints
+- **Probabilitat:** Mitjana
+- **Impacte:** Mitjà
+- **Prevenció:**
+  - Distribució equilibrada de tasques
+  - Flexibilitat en terminis si cal
+  - Suport mutu entre membres de l'equip
+
+**8. Riscos elèctrics**
+- **Descripció:** Manipulació incorrecta d'equips i instal·lacions
+- **Probabilitat:** Baixa
+- **Impacte:** Alt
+- **Prevenció:**
+  - Seguir normes de seguretat elèctrica
+  - Equips amb certificació CE
+  - No manipular equips amb corrient
+
+### Mitjans i Mesures de Prevenció
+
+#### Equips de Protecció Individual (EPI)
+- **No aplica** en aquest projecte (entorn de laboratori informàtic)
+
+#### Mitjans Tècnics
+- Sistemes d'alimentació ininterrompuda (SAI) per als servidors
+- Extintors al laboratori
+- Sistema de ventilació adequat
+
+#### Formació i Procediments
+- **Formació en seguretat informàtica:** Bones pràctiques en configuració de servidors
+- **Procediments documentats:** Guies pas a pas per cada servei
+- **Check-lists de verificació:** Abans de posar serveis en producció
+
+#### Mesures Organitzatives
+- **Planificació en sprints:** Evita sobrecàrrega puntual
+- **Revisió per parells:** Totes les configuracions crítiques revisades per un company
+- **Documentació contínua:** Cada canvi queda registrat
+
+
+### Pla d'Acció en Cas d'Incidència
+
+#### Incidència Tècnica
+1. Documentar l'error i els símptomes
+2. Restaurar última configuració funcional (backup)
+3. Analitzar la causa arrel
+4. Aplicar solució i verificar
+5. Actualitzar documentació
+
+#### Incidència de Seguretat
+1. Aïllar el sistema compromès
+2. Avaluar l'abast de la incidència
+3. Aplicar pegats/actualitzacions
+4. Revisar logs i configuracions
+5. Implementar mesures correctives addicionals
 
 ---
 
