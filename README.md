@@ -59,7 +59,7 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 - PC Linux
 ---
 
-## P0.2/PF: Plan de Prevención de Riesgos Laborales (RA3)
+##  Plan de Prevención de Riesgos Laborales
 
 ### Identificació de Riscos del Projecte
 
