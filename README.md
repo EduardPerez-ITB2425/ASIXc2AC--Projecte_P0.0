@@ -73,14 +73,9 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 ### Clients
 - PC Windows
 - PC Linux
----
-
-##  Plan de Prevención de Riesgos Laborales
-
-(https://docs.google.com/document/d/1FECaZZFULFxXc-NEI9rzEbMYEfymHPD1h15zuCWg2hA/edit?usp=sharing)
-
 
 ---
+
 
 ## Sprint 1 - Configuració Serveis de Xarxa
 
