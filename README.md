@@ -1,5 +1,20 @@
 # ASIXc2AC--Projecte_P0.0
 
+## 📑 Índex
+
+- [Informació del Projecte](#informació-del-projecte)
+- [Descripció](#descripció)
+- [Objectius](#objectius)
+- [Arquitectura de Xarxa](#arquitectura-de-xarxa)
+  - [Esquema d'IPs - Xarxa 192.168.6.X](#esquema-dips---xarxa-1921686x)
+- [Hardware Desplegat](#hardware-desplegat)
+- [Plan de Prevención de Riesgos Laborales](#plan-de-prevención-de-riesgos-laborales)
+- [Configuració DNS Server (D-N03)](#configuració-dns-server-d-n03)
+- [Configuració DHCP Server](#configuració-dhcp-server)
+- [Configuració Router R-N01](#configuració-router-r-n01)
+
+---
+
 ## Informació del Projecte
 
 **Nom del Projecte:** P0.0-ASIXc2gC-Gnn  
