@@ -449,7 +449,7 @@ Totes les proves mostren 0% packet loss confirmant la correcta configuració del
 
 Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la configuració de la interfície enp2s0 del servidor web amb IP estàtica 192.168.6.10/24, gateway 192.168.6.1 per a la xarxa DMZ.
 
-![Configuració Netplan Web Server](./Photos2/1.png)
+![Configuració Netplan Web Server](./Photos/sprint%202/web/1.png)
 
 ---
 
@@ -457,7 +457,7 @@ Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la conf
 
 Proves de connectivitat mitjançant ping des del servidor web cap al servidor FTP (192.168.6.11) i cap al router (192.168.6.1). Ambdues proves mostren 0% packet loss confirmant la correcta configuració de xarxa a la DMZ.
 
-![Proves connectivitat Web Server](./Photos2/2.png)
+![Proves connectivitat Web Server](./Photos/sprint%202/web/2.png)
 
 ---
 
@@ -465,7 +465,7 @@ Proves de connectivitat mitjançant ping des del servidor web cap al servidor FT
 
 Configuració de les regles d'iptables al router R-N01 per permetre l'accés al servidor web. S'afegeixen regles INPUT per acceptar tràfic des de les xarxes DMZ (192.168.6.0/24) i Intranet (192.168.60.0/24), així com per a IPs específiques del web server (192.168.6.10 i 192.168.6.11).
 
-![Regles iptables per Web Server](./Photos2/3.png)
+![Regles iptables per Web Server](./Photos/sprint%202/web/3.png)
 
 ---
 
@@ -473,7 +473,7 @@ Configuració de les regles d'iptables al router R-N01 per permetre l'accés al 
 
 Instal·lació del servidor Apache2 i verificació que el servei està actiu (active/running) des del 10 de novembre. Es mostra l'estat del servei amb PID 2266 i el hostname del servidor 192.168.121.26 192.168.6.10.
 
-![Estat servei Apache2](./Photos2/4.png)
+![Estat servei Apache2](./Photos/sprint%202/web/4.png)
 
 ---
 
@@ -481,7 +481,7 @@ Instal·lació del servidor Apache2 i verificació que el servei està actiu (ac
 
 Verificació de l'estat del servei Apache2, configuració del hostname, habilitació de la regla UFW per "Apache Full" (ports 80 i 443), i habilitació dels mòduls SSL necessaris (ssl, socache_shmcb). El servei està actiu i escoltant en múltiples ports incloent 80, 443 i [::]:22.
 
-![Configuració UFW i SSL](./Photos2/5.png)
+![Configuració UFW i SSL](./Photos/sprint%202/web/5.png)
 
 ---
 
@@ -489,7 +489,7 @@ Verificació de l'estat del servei Apache2, configuració del hostname, habilita
 
 Execució de la comanda `sudo a2enmod ssl` per habilitar els mòduls SSL (setenvif, mime, socache_shmcb, ssl). Després s'habilita el lloc SSL per defecte amb `sudo a2ensite default-ssl.conf` i es recarrega Apache2. Es verifica la configuració amb `apache2ctl configtest` mostrant un warning sobre el ServerName.
 
-![Habilitació SSL i configuració](./Photos2/6.png)
+![Habilitació SSL i configuració](./Photos/sprint%202/web/6.png)
 
 ---
 
@@ -497,7 +497,7 @@ Execució de la comanda `sudo a2enmod ssl` per habilitar els mòduls SSL (setenv
 
 Accés al servidor web mitjançant el navegador Firefox a l'adreça http://192.168.6.10 mostrant la pàgina per defecte d'Apache2 Ubuntu. Es visualitza la pàgina de benvinguda confirmant que el servidor web està operatiu i accessible des de la xarxa.
 
-![Accés HTTP al Web Server](./Photos2/7.png)
+![Accés HTTP al Web Server](./Photos/sprint%202/web/7.png)
 
 ---
 
@@ -505,7 +505,7 @@ Accés al servidor web mitjançant el navegador Firefox a l'adreça http://192.1
 
 Intent d'accés al servidor web mitjançant HTTPS (https://192.168.6.10). Firefox detecta un risc de seguretat potencial perquè el certificat SSL és autosignat (self-signed). Es mostra l'error "MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT" amb opcions per retrocedir o acceptar el risc.
 
-![Advertència certificat SSL](./Photos2/8.png)
+![Advertència certificat SSL](./Photos/sprint%202/web/8.png)
 
 ---
 
@@ -513,7 +513,7 @@ Intent d'accés al servidor web mitjançant HTTPS (https://192.168.6.10). Firefo
 
 Després d'acceptar el risc de seguretat, s'accedeix correctament al servidor web per HTTPS (https://192.168.6.10) mostrant la mateixa pàgina per defecte d'Apache2 Ubuntu. Això confirma que el servidor està funcionant tant en HTTP com en HTTPS.
 
-![Accés HTTPS al Web Server](./Photos2/9.png)
+![Accés HTTPS al Web Server](./Photos/sprint%202/web/9.png)
 
 ---
 
@@ -521,7 +521,7 @@ Després d'acceptar el risc de seguretat, s'accedeix correctament al servidor we
 
 Verificació de l'estat del servei SSH amb `sudo systemctl status ssh` mostrant que està actiu des de les 17:02. Es configura el fitxer `/etc/ssh/sshd_config`, es reinicia el servei, i s'afegeix la regla UFW per permetre el port 2222/tcp. L'estat del firewall mostra les regles actives per Apache Full i SSH (port 2222).
 
-![Configuració servei SSH](./Photos2/10.png)
+![Configuració servei SSH](./Photos/sprint%202/web/10.png)
 
 ---
 
@@ -529,7 +529,7 @@ Verificació de l'estat del servei SSH amb `sudo systemctl status ssh` mostrant 
 
 Visualització del fitxer de configuració `/etc/ssh/sshd_config` amb nano mostrant els paràmetres principals: Port 2222, autenticació per clau pública habilitada (PubkeyAuthentication yes), login de root deshabilitat (PermitRootLogin no), i configuració de logging i autenticació.
 
-![Configuració sshd_config](./Photos2/11.png)
+![Configuració sshd_config](./Photos/sprint%202/web/11.png)
 
 ---
 
@@ -537,7 +537,7 @@ Visualització del fitxer de configuració `/etc/ssh/sshd_config` amb nano mostr
 
 Configuració de les regles d'iptables al router R-N01 per permetre l'accés SSH al servidor web. S'afegeixen regles INPUT per permetre: loopback, connexions establertes, ping (ICMP), SSH al router (port 22), accés des de les xarxes DMZ i Intranet, i accés a IPs específiques del web server. També s'afegeix una regla FORWARD bidireccional entre les xarxes DMZ i Intranet.
 
-![Regles iptables per SSH](./Photos2/12.png)
+![Regles iptables per SSH](./Photos/sprint%202/web/12.png)
 
 ---
 
@@ -545,7 +545,7 @@ Configuració de les regles d'iptables al router R-N01 per permetre l'accés SSH
 
 Edició del fitxer `/etc/sysctl.conf` al router amb nano per habilitar el forwarding de paquets IPv4. Es descomenta la línia `net.ipv4.ip_forward=1` per permetre que el router encamini paquets entre diferents interfícies de xarxa.
 
-![Configuració IP forwarding](./Photos2/13.png)
+![Configuració IP forwarding](./Photos/sprint%202/web/13.png)
 
 ---
 
@@ -553,7 +553,7 @@ Edició del fitxer `/etc/sysctl.conf` al router amb nano per habilitar el forwar
 
 Creació de l'script `/usr/local/bin/iptables-rules.sh` i del servei systemd `/etc/systemd/system/iptables-rules.service` per fer persistents les regles d'iptables. S'habilita i s'inicia el servei amb `systemctl enable/start iptables-rules.service`. La verificació mostra que el servei està actiu (active/exited) i s'ha carregat correctament.
 
-![Servei persistència iptables](./Photos2/14.png)
+![Servei persistència iptables](./Photos/sprint%202/web/14.png)
 
 ---
 
@@ -561,7 +561,7 @@ Creació de l'script `/usr/local/bin/iptables-rules.sh` i del servei systemd `/e
 
 Visualització del fitxer `/etc/systemd/system/add-static-route.service` al servidor web (W-NCC) que configura una ruta estàtica cap a la xarxa Intranet (192.168.60.0/24) via el router (192.168.6.1). Aquest servei s'executa després de la xarxa estar disponible.
 
-![Servei ruta estàtica Web Server](./Photos2/15.png)
+![Servei ruta estàtica Web Server](./Photos/sprint%202/web/15.png)
 
 ---
 
@@ -569,7 +569,7 @@ Visualització del fitxer `/etc/systemd/system/add-static-route.service` al serv
 
 Comprovació del contingut del fitxer `/etc/systemd/system/add-static-route.service` al servidor de base de dades (B-N06) amb una configuració similar, establint la ruta estàtica cap a la xarxa DMZ (192.168.6.0/24) via el router de la Intranet (192.168.60.1).
 
-![Verificació ruta estàtica Database](./Photos2/16.png)
+![Verificació ruta estàtica Database](./Photos/sprint%202/web/16.png)
 
 ---
 
@@ -577,7 +577,7 @@ Comprovació del contingut del fitxer `/etc/systemd/system/add-static-route.serv
 
 Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el port 2222 amb la comanda `ssh -p 2222 bchecker@192.168.6.10`. S'accedeix correctament al sistema Ubuntu 22.04.4 LTS mostrant informació de documentació, management i suport. El darrer login va ser des de 192.168.6.11.
 
-![Connexió SSH FTP a Web](./Photos2/17.png)
+![Connexió SSH FTP a Web](./Photos/sprint%202/web/17.png)
 
 ---
 
@@ -585,7 +585,7 @@ Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el
 
 Edició del fitxer `/etc/apache2/mods-enabled/dir.conf` amb nano per configurar l'ordre del DirectoryIndex. S'estableix que index.php tingui prioritat sobre els altres fitxers d'índex (index.html, index.cgi, etc.).
 
-![Configuració DirectoryIndex](./Photos2/19.png)
+![Configuració DirectoryIndex](./Photos/sprint%202/web/19.png)
 
 ---
 
@@ -593,7 +593,7 @@ Edició del fitxer `/etc/apache2/mods-enabled/dir.conf` amb nano per configurar 
 
 Comprovació de la versió de PHP instal·lada mostrant PHP 8.1.2-1ubuntu2.22 amb Zend Engine v4.1.2 i Zend OPcache v8.1.2. S'executa la comanda `php -m | grep -E 'mysqli|pdo'` per verificar que els mòduls mysqli i pdo_mysql estan instal·lats correctament.
 
-![Verificació PHP i mòduls](./Photos2/20.png)
+![Verificació PHP i mòduls](./Photos/sprint%202/web/20.png)
 
 ---
 
@@ -601,7 +601,7 @@ Comprovació de la versió de PHP instal·lada mostrant PHP 8.1.2-1ubuntu2.22 am
 
 Creació de l'arxiu `/var/www/html/test.php` amb la funció `phpinfo();` per mostrar la informació de configuració de PHP. Es configuren els permisos adequats amb `chown www-data:www-data` i `chmod 644`. Es verifica el contingut del fitxer mostrant el codi PHP bàsic.
 
-![Creació test.php](./Photos2/21.png)
+![Creació test.php](./Photos/sprint%202/web/21.png)
 
 ---
 
@@ -609,7 +609,7 @@ Creació de l'arxiu `/var/www/html/test.php` amb la funció `phpinfo();` per mos
 
 Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgina d'informació de PHP (phpinfo). Es visualitza la versió PHP 8.1.2-1ubuntu2.22 amb informació detallada del sistema, build date, server API, directives de configuració, PHP Extension, Zend Extension i altres paràmetres de configuració de PHP.
 
-![Visualització phpinfo()](./Photos2/22.png)
+![Visualització phpinfo()](./Photos/sprint%202/web/22.png)
 
 ---
 
@@ -617,7 +617,7 @@ Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgi
 
 Vista ampliada de la pàgina phpinfo() mostrant informació completa sobre la configuració de PHP incloent: System, Build Date, Build System, Server API, Virtual Directory Support, Configuration File, Loaded Configuration File, extensions carregades, PHP API, PHP Extension, Zend Extension, Debug Build, Thread Safety, i altres paràmetres tècnics del servidor PHP.
 
-![Detall configuració PHP](./Photos2/22.png)
+![Detall configuració PHP](./Photos/sprint%202/web/22.png)
 
 ---
 
@@ -627,7 +627,7 @@ Vista ampliada de la pàgina phpinfo() mostrant informació completa sobre la co
 
 Instal·lació del paquet `mysql-server` amb la comanda `sudo apt install mysql-server`. El sistema descarrega i instal·la automàticament tots els paquets necessaris incloent llibreries perl, llibcgi, libevent, mecab i les dependències de MySQL 8.0.
 
-![Instal·lació MySQL Server](./Photos2/BBDD1.png)
+![Instal·lació MySQL Server](./Photos/sprint%202/BBDD/BBDD1.png)
 
 ---
 
@@ -635,7 +635,7 @@ Instal·lació del paquet `mysql-server` amb la comanda `sudo apt install mysql-
 
 Script SQL per crear la taula `equipaments` amb els camps: register_id (VARCHAR 50), nom (VARCHAR 255 NOT NULL), institution_id (VARCHAR 50), institution_name (VARCHAR 255), created i modified (TIMESTAMP), geo_x i geo_y (FLOAT), latitude i longitude (FLOAT), estimated_dates (VARCHAR 100), start_date i end_date (DATE), i timetable (TEXT).
 
-![Taula equipaments](./Photos2/BBDD2.png)
+![Taula equipaments](./Photos/sprint%202/BBDD/BBDD2.png)
 
 ---
 
@@ -643,7 +643,7 @@ Script SQL per crear la taula `equipaments` amb els camps: register_id (VARCHAR 
 
 Script SQL per crear la taula `direccions` amb clau forana (FOREIGN KEY) referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), roadtype_id, roadtype_name, road_id, road_name (VARCHAR 255), start_street_number i end_street_number (VARCHAR 10), neighborhood_id, neighborhood_name, district_id, district_name (VARCHAR 100), zip_code (VARCHAR 10), town (VARCHAR 100), main_address i address_type (VARCHAR 50).
 
-![Taula direccions](./Photos2/BBDD3.png)
+![Taula direccions](./Photos/sprint%202/BBDD/BBDD3.png)
 
 ---
 
@@ -651,7 +651,7 @@ Script SQL per crear la taula `direccions` amb clau forana (FOREIGN KEY) referen
 
 Script SQL per crear la taula `valors` amb clau forana referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), attribute_id (VARCHAR 50), values_id (VARCHAR 50), category (VARCHAR 100), attribute_name (VARCHAR 100), value (VARCHAR 255), outstanding (VARCHAR 50), i description (TEXT).
 
-![Taula valors](./Photos2/BBDD4.png)
+![Taula valors](./Photos/sprint%202/BBDD/BBDD4.png)
 
 ---
 
@@ -659,7 +659,7 @@ Script SQL per crear la taula `valors` amb clau forana referenciada a equipament
 
 Script SQL per crear la taula `filtres_secundaris` amb clau forana referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), filter_id (VARCHAR 50), filter_name (VARCHAR 255), filter_fullpath (TEXT), filter_tree (VARCHAR 255), i filter_asia_id (VARCHAR 50).
 
-![Taula filtres_secundaris](./Photos2/BBDD5.png)
+![Taula filtres_secundaris](./Photos/sprint%202/BBDD/BBDD5.png)
 
 ---
 
@@ -667,7 +667,7 @@ Script SQL per crear la taula `filtres_secundaris` amb clau forana referenciada 
 
 Execució de la comanda `SHOW TABLES;` a MySQL mostrant les 4 taules creades correctament a la base de dades EquipamentsBCN: direccions, equipaments, filtres_secundaris i valors. El resultat mostra "4 rows in set (0,01 sec)".
 
-![Verificació taules MySQL](./Photos2/BBDD6.png)
+![Verificació taules MySQL](./Photos/sprint%202/BBDD/BBDD6.png)
 
 ---
 
@@ -675,7 +675,7 @@ Execució de la comanda `SHOW TABLES;` a MySQL mostrant les 4 taules creades cor
 
 Execució de la comanda `SHOW COLUMNS FROM equipaments;` mostrant l'estructura completa de la taula amb 14 camps: register_id (PRI, varchar 50), nom (varchar 255), institution_id, institution_name, created i modified (timestamp), geo_x, geo_y, latitude i longitude (float), estimated_dates (varchar 100), start_date i end_date (date), i timetable (text).
 
-![Columnes taula equipaments](./Photos2/BBDD7.png)
+![Columnes taula equipaments](./Photos/sprint%202/BBDD/BBDD7.png)
 
 ---
 
@@ -683,7 +683,7 @@ Execució de la comanda `SHOW COLUMNS FROM equipaments;` mostrant l'estructura c
 
 Execució de la comanda `SHOW COLUMNS FROM direccions;` mostrant l'estructura completa amb 15 camps. Equipment_id està configurat com a MUL (clau múltiple/forana) referenciant la taula equipaments. Tots els camps són VARCHAR excepte address_type, amb mides que varien entre VARCHAR(10) i VARCHAR(255).
 
-![Columnes taula direccions](./Photos2/BBDD8.png)
+![Columnes taula direccions](./Photos/sprint%202/BBDD/BBDD8.png)
 
 ---
 
@@ -691,7 +691,7 @@ Execució de la comanda `SHOW COLUMNS FROM direccions;` mostrant l'estructura co
 
 Execució de la comanda `SHOW COLUMNS FROM valors;` mostrant l'estructura amb 8 camps. Equipment_id està configurat com a MUL (clau forana). Els camps inclouen: equipment_id, attribute_id, values_id (VARCHAR 50), category i attribute_name (VARCHAR 100), value (VARCHAR 255), outstanding (VARCHAR 50) i description (TEXT).
 
-![Columnes taula valors](./Photos2/BBDD9.png)
+![Columnes taula valors](./Photos/sprint%202/BBDD/BBDD9.png)
 
 ---
 
@@ -699,6 +699,6 @@ Execució de la comanda `SHOW COLUMNS FROM valors;` mostrant l'estructura amb 8 
 
 Execució de la comanda `SHOW COLUMNS FROM filtres_secundaris;` mostrant l'estructura amb 6 camps. Equipment_id està configurat com a MUL (clau forana). Els camps inclouen: equipment_id, filter_id (VARCHAR 50), filter_name (VARCHAR 255), filter_fullpath (TEXT), filter_tree (VARCHAR 255) i filter_asia_id (VARCHAR 50).
 
-![Columnes taula filtres_secundaris](./Photos2/BBDD10.png)
+![Columnes taula filtres_secundaris](./Photos/sprint%202/BBDD/BBDD10.png)
 
 ---
