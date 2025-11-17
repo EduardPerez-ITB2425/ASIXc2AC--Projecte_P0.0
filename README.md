@@ -702,3 +702,117 @@ Execució de la comanda `SHOW COLUMNS FROM filtres_secundaris;` mostrant l'estru
 ![Columnes taula filtres_secundaris](./Photos/sprint%202/BBDD/BBDD10.png)
 
 ---
+
+### Configuració FTP Server (F-N02)
+
+#### Pas 1: Instal·lació del servidor vsftpd
+
+Instal·lació del paquet `vsftpd` (Very Secure FTP Daemon) amb la comanda `sudo apt install vsftpd`. El sistema descarrega i instal·la el paquet vsftpd versió 3.0.5-0ubuntu1.1 amb una mida de 123 kB. Es crea automàticament el servei systemd i s'instal·len les dependències necessàries.
+
+![Instal·lació vsftpd](./Photos/sprint%202/ftp/ftp1.png)
+
+---
+
+#### Pas 2: Verificació de la versió de vsftpd
+
+Comprovació de la versió instal·lada de vsftpd amb la comanda `vsftpd -v`. El sistema confirma que s'ha instal·lat la versió 3.0.5 del servidor FTP.
+
+![Versió vsftpd](./Photos/sprint%202/ftp/ftp2.png)
+
+---
+
+#### Pas 3: Habilitació del servei vsftpd
+
+Habilitació del servei vsftpd per iniciar-se automàticament amb l'arrencada del sistema mitjançant la comanda `sudo systemctl enable vsftpd`. Això crea els enllaços simbòlics necessaris per al servei.
+
+![Habilitació servei vsftpd](./Photos/sprint%202/ftp/ftp3.png)
+
+---
+
+#### Pas 4: Inici i verificació de l'estat del servei vsftpd
+
+Execució de les comandes `sudo systemctl start vsftpd` i `sudo systemctl status vsftpd` per iniciar i verificar l'estat del servei. El servei està actiu (active/running) des del 10 de novembre a les 16:07, amb PID 2329, consumint 868.0K de memòria i llegint la configuració del fitxer `/etc/vsftpd.conf`.
+
+![Estat servei vsftpd](./Photos/sprint%202/ftp/ftp4.png)
+
+---
+
+#### Pas 5: Accés al fitxer de configuració vsftpd.conf
+
+Edició del fitxer de configuració principal `/etc/vsftpd.conf` amb nano per configurar els paràmetres del servidor FTP.
+
+![Edició vsftpd.conf](./Photos/sprint%202/ftp/ftp5.png)
+
+---
+
+#### Pas 6: Habilitació d'usuaris locals
+
+Configuració del paràmetre `local_enable=YES` al fitxer vsftpd.conf per permetre que els usuaris locals del sistema puguin iniciar sessió al servidor FTP.
+
+![Habilitació usuaris locals](./Photos/sprint%202/ftp/ftp6.png)
+
+---
+
+#### Pas 7: Deshabilitació de l'accés anònim
+
+Configuració del paràmetre `anonymous_enable=NO` al fitxer vsftpd.conf per deshabilitar l'accés anònim al servidor FTP, millorant així la seguretat del sistema.
+
+![Deshabilitació accés anònim](./Photos/sprint%202/ftp/ftp7.png)
+
+---
+
+#### Pas 8: Habilitació d'escriptura FTP
+
+Configuració del paràmetre `write_enable=YES` al fitxer vsftpd.conf per permetre qualsevol forma de comandes d'escriptura FTP, incloent pujada, eliminació i modificació d'arxius.
+
+![Habilitació escriptura FTP](./Photos/sprint%202/ftp/ftp8.png)
+
+---
+
+#### Pas 9: Restricció d'usuaris al directori personal
+
+Configuració del paràmetre `chroot_local_user=YES` al fitxer vsftpd.conf per restringir els usuaris locals als seus directoris personals, impedint que naveguin per altres parts del sistema de fitxers per motius de seguretat.
+
+![Restricció chroot](./Photos/sprint%202/ftp/ftp9.png)
+
+---
+
+#### Pas 10: Reinici i verificació del servei vsftpd
+
+Reinici del servei vsftpd amb `sudo systemctl restart vsftpd` per aplicar els canvis de configuració. La verificació amb `sudo systemctl status vsftpd` confirma que el servei està actiu (active/running) des de les 16:13:16 amb PID 2787.
+
+![Reinici servei vsftpd](./Photos/sprint%202/ftp/ftp10.png)
+
+---
+
+#### Pas 11: Creació de l'usuari FTP usuarigroup6
+
+Creació de l'usuari `usuarigroup6` amb la comanda `sudo adduser usuarigroup6`. El sistema crea l'usuari amb UID 1002, el grup usuarigroup6 (GID 1002), el directori personal `/home/usuarigroup6`, i es configura la contrasenya i la informació del usuari.
+
+![Creació usuari FTP](./Photos/sprint%202/ftp/ftp11.png)
+
+---
+
+#### Pas 12: Configuració del directori FTP i permisos
+
+Creació del directori `/home/usuarigroup6/ftp` amb `sudo mkdir -p`, assignació de propietat a nobody:nogroup amb `sudo chown nobody:nogroup`, i configuració dels permisos a+w amb `sudo chmod a+w` per permetre l'escriptura a tots els usuaris.
+
+![Configuració directori FTP](./Photos/sprint%202/ftp/ftp12.png)
+
+---
+
+#### Pas 13: Configuració del firewall per FTP
+
+Habilitació del port 22/tcp al firewall UFW amb la comanda `sudo ufw allow 22/tcp` per permetre les connexions FTP. El sistema confirma que les regles han estat actualitzades tant per IPv4 com per IPv6.
+
+![Configuració firewall FTP](./Photos/sprint%202/ftp/ftp13.png)
+
+---
+
+#### Pas 14: Prova de connexió SSH des del servidor FTP
+
+Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el port 2222 amb la comanda `ssh -p 2222 bchecker@192.168.6.10`. S'accedeix correctament al sistema Ubuntu 22.04.4 LTS mostrant la informació de benvinguda. El darrer login va ser el 10 de novembre a les 17:32:01 des de 192.168.6.11.
+
+![Connexió SSH des de FTP](./Photos/sprint%202/ftp/ftp14.png)
+
+---
