@@ -89,6 +89,128 @@ Projecte de desplegament d'infraestructura multicapa que inclou:
 - PC Windows
 - PC Linux
 
+## Justificació de l'Estructura i Tecnologia de Xarxa
+
+### Arquitectura General
+
+#### Router Central amb Tres Interfícies (R-N01)
+L'arquitectura proposada utilitza un **router amb tres interfícies** que segmenta la xarxa en tres zones diferents:
+- **Interfície NAT** (cap a Internet)
+- **Interfície DMZ** (192.168.6.0/24)
+- **Interfície Intranet** (192.168.60.0/24)
+
+Aquesta segmentació proporciona **aïllament lògic** entre les diferents zones de seguretat, permetent aplicar polítiques de firewall específiques per a cada segment.
+
+---
+
+### Zona DMZ (192.168.6.0/24)
+
+#### Justificació de Serveis Públics
+
+##### Web Server (W-N02) - 192.168.6.10
+- **Tecnologia**: Apache/Nginx amb SSH
+- **Justificació**: 
+  - Servidor web accessible des d'Internet per allotjar l'aplicació web pública
+  - SSH permet administració remota segura
+  - Ubicat a la DMZ per protegir la xarxa interna d'amenaces externes
+  - En cas de compromís, no exposa directament la xarxa interna
+
+##### FTP Server (F-N02) - 192.168.6.11
+- **Tecnologia**: vsftpd/ProFTPD
+- **Justificació**:
+  - Transferència d'arxius des de/cap a l'exterior
+  - Separat del servidor web per limitar l'impacte de vulnerabilitats
+  - Permet gestió d'arxius sense accés directe al servidor web
+
+#### Avantatges de la DMZ
+- **Capa de seguretat addicional**: Els servidors públics estan aïllats de la xarxa interna
+- **Control de trànsit**: El router pot inspeccionar i filtrar tot el trànsit entre DMZ i Intranet
+- **Contenció d'amenaces**: Si un servidor a la DMZ és compromès, l'atacant no té accés directe a la Intranet
+
+---
+
+### Zona Intranet (192.168.60.0/24)
+
+#### Database Server (B-N03) - 192.168.60.15
+- **Tecnologia**: MySQL
+- **Justificació**:
+  - **Base de dades protegida**: No està directament accessible des d'Internet
+  - **Dades sensibles segures**: Emmagatzema informació de "CSV Educación BCN" amb usuari "bchecker"
+  - **Accés controlat**: Només accessible des de la xarxa interna i mitjançant regles específiques des de la DMZ
+  - Redueix significativament el risc d'atacs d'injecció SQL des de l'exterior
+
+#### DHCP Server - 192.168.60.20
+- **Rang**: 30-100
+- **Justificació**:
+  - **Gestió automàtica d'IPs**: Facilita l'administració de clients
+  - **Escalabilitat**: Permet agregar nous dispositius sense configuració manual
+  - **Rang controlat**: El rang 30-100 permet 71 adreces dinàmiques, deixant les primeres IPs per a serveis estàtics
+
+#### DNS Server - 192.168.60.20
+- **Funció**: Resol R-N01, R
+- **Justificació**:
+  - **Resolució de noms interna**: Facilita l'accés als recursos per nom en lloc d'IP
+  - **Simplificació de gestió**: Els canvis d'IP no afecten les aplicacions que usen noms
+  - **Centralització**: Mateix servidor que DHCP per eficiència
+
+#### Clients (PC Windows i PC Linux)
+- **Configuració**: DHCP
+- **IPs**: 192.168.60.x
+- **Justificació**:
+  - **Flexibilitat**: Els usuaris no necessiten coneixements de xarxa
+  - **Mobilitat**: Els dispositius poden canviar d'ubicació sense reconfiguració
+  - **Gestió centralitzada**: Canvis de configuració es realitzen al servidor DHCP
+
+---
+
+### Avantatges de l'Arquitectura Proposada
+
+#### Seguretat
+1. **Segmentació en capes**: Internet → DMZ → Intranet
+2. **Principi de mínim privilegi**: Cada zona té accés limitat a les altres
+3. **Protecció de dades**: Base de dades inaccessible des d'Internet
+4. **Punt únic de control**: El router R-N01 gestiona tot el trànsit entre zones
+
+#### Escalabilitat
+- Fàcil afegir nous servidors a la DMZ o Intranet
+- El DHCP permet creixement de clients sense reconfiguració
+- Estructura modular que facilita expansions futures
+
+#### Mantenibilitat
+- Separació clara de responsabilitats per zona
+- DNS intern simplifica canvis d'infraestructura
+- Serveis especialitzats en servidors dedicats
+
+#### Rendiment
+- El trànsit intern (Intranet) no passa per la DMZ
+- La base de dades està a la mateixa xarxa que els clients, reduint latència
+- Serveis distribuïts eviten colls d'ampolla
+
+---
+
+### Flux de Comunicació
+
+#### Accés Extern → Aplicació Web
+1. Usuari d'Internet → R-N01 (NAT)
+2. R-N01 → W-N02 (DMZ)
+3. W-N02 → R-N01 → B-N03 (consulta BD)
+4. Resposta inversa
+
+#### Accés Intern
+- Clients (192.168.60.x) → B-N03: Comunicació directa a la mateixa xarxa
+- Clients → Internet: NAT a R-N01
+
+---
+
+### Conclusió
+
+Aquesta arquitectura implementa les **millors pràctiques de seguretat en xarxes** mitjançant:
+- Defensa en profunditat (múltiples capes de seguretat)
+- Segmentació de xarxa basada en funcionalitat i nivell d'exposició
+- Serveis crítics protegits a la xarxa interna
+- Serveis públics aïllats a la DMZ
+- Gestió centralitzada i automatitzada de la xarxa interna
+
 ---
 
 
@@ -496,5 +618,87 @@ Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgi
 Vista ampliada de la pàgina phpinfo() mostrant informació completa sobre la configuració de PHP incloent: System, Build Date, Build System, Server API, Virtual Directory Support, Configuration File, Loaded Configuration File, extensions carregades, PHP API, PHP Extension, Zend Extension, Debug Build, Thread Safety, i altres paràmetres tècnics del servidor PHP.
 
 ![Detall configuració PHP](./Photos2/22.png)
+
+---
+
+### Configuració Database Server (B-N03)
+
+#### Pas 1: Instal·lació del servidor MySQL
+
+Instal·lació del paquet `mysql-server` amb la comanda `sudo apt install mysql-server`. El sistema descarrega i instal·la automàticament tots els paquets necessaris incloent llibreries perl, llibcgi, libevent, mecab i les dependències de MySQL 8.0.
+
+![Instal·lació MySQL Server](./Photos2/BBDD1.png)
+
+---
+
+#### Pas 2: Creació de la taula equipaments
+
+Script SQL per crear la taula `equipaments` amb els camps: register_id (VARCHAR 50), nom (VARCHAR 255 NOT NULL), institution_id (VARCHAR 50), institution_name (VARCHAR 255), created i modified (TIMESTAMP), geo_x i geo_y (FLOAT), latitude i longitude (FLOAT), estimated_dates (VARCHAR 100), start_date i end_date (DATE), i timetable (TEXT).
+
+![Taula equipaments](./Photos2/BBDD2.png)
+
+---
+
+#### Pas 3: Creació de la taula direccions
+
+Script SQL per crear la taula `direccions` amb clau forana (FOREIGN KEY) referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), roadtype_id, roadtype_name, road_id, road_name (VARCHAR 255), start_street_number i end_street_number (VARCHAR 10), neighborhood_id, neighborhood_name, district_id, district_name (VARCHAR 100), zip_code (VARCHAR 10), town (VARCHAR 100), main_address i address_type (VARCHAR 50).
+
+![Taula direccions](./Photos2/BBDD3.png)
+
+---
+
+#### Pas 4: Creació de la taula valors
+
+Script SQL per crear la taula `valors` amb clau forana referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), attribute_id (VARCHAR 50), values_id (VARCHAR 50), category (VARCHAR 100), attribute_name (VARCHAR 100), value (VARCHAR 255), outstanding (VARCHAR 50), i description (TEXT).
+
+![Taula valors](./Photos2/BBDD4.png)
+
+---
+
+#### Pas 5: Creació de la taula filtres_secundaris
+
+Script SQL per crear la taula `filtres_secundaris` amb clau forana referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), filter_id (VARCHAR 50), filter_name (VARCHAR 255), filter_fullpath (TEXT), filter_tree (VARCHAR 255), i filter_asia_id (VARCHAR 50).
+
+![Taula filtres_secundaris](./Photos2/BBDD5.png)
+
+---
+
+#### Pas 6: Verificació de les taules creades
+
+Execució de la comanda `SHOW TABLES;` a MySQL mostrant les 4 taules creades correctament a la base de dades EquipamentsBCN: direccions, equipaments, filtres_secundaris i valors. El resultat mostra "4 rows in set (0,01 sec)".
+
+![Verificació taules MySQL](./Photos2/BBDD6.png)
+
+---
+
+#### Pas 7: Visualització de l'estructura de la taula equipaments
+
+Execució de la comanda `SHOW COLUMNS FROM equipaments;` mostrant l'estructura completa de la taula amb 14 camps: register_id (PRI, varchar 50), nom (varchar 255), institution_id, institution_name, created i modified (timestamp), geo_x, geo_y, latitude i longitude (float), estimated_dates (varchar 100), start_date i end_date (date), i timetable (text).
+
+![Columnes taula equipaments](./Photos2/BBDD7.png)
+
+---
+
+#### Pas 8: Visualització de l'estructura de la taula direccions
+
+Execució de la comanda `SHOW COLUMNS FROM direccions;` mostrant l'estructura completa amb 15 camps. Equipment_id està configurat com a MUL (clau múltiple/forana) referenciant la taula equipaments. Tots els camps són VARCHAR excepte address_type, amb mides que varien entre VARCHAR(10) i VARCHAR(255).
+
+![Columnes taula direccions](./Photos2/BBDD8.png)
+
+---
+
+#### Pas 9: Visualització de l'estructura de la taula valors
+
+Execució de la comanda `SHOW COLUMNS FROM valors;` mostrant l'estructura amb 8 camps. Equipment_id està configurat com a MUL (clau forana). Els camps inclouen: equipment_id, attribute_id, values_id (VARCHAR 50), category i attribute_name (VARCHAR 100), value (VARCHAR 255), outstanding (VARCHAR 50) i description (TEXT).
+
+![Columnes taula valors](./Photos2/BBDD9.png)
+
+---
+
+#### Pas 10: Visualització de l'estructura de la taula filtres_secundaris
+
+Execució de la comanda `SHOW COLUMNS FROM filtres_secundaris;` mostrant l'estructura amb 6 camps. Equipment_id està configurat com a MUL (clau forana). Els camps inclouen: equipment_id, filter_id (VARCHAR 50), filter_name (VARCHAR 255), filter_fullpath (TEXT), filter_tree (VARCHAR 255) i filter_asia_id (VARCHAR 50).
+
+![Columnes taula filtres_secundaris](./Photos2/BBDD10.png)
 
 ---
