@@ -325,9 +325,12 @@ Comprovació amb `sudo systemctl status bind9` que el servei named.service està
 
 #### Pas 1: Instal·lació del servei DHCP
 
-![Instal·lació DHCP](./Photos/Sprint%201/DHCP1.png)
-
 Instal·lació del paquet `isc-dhcp-server` al servidor Ubuntu.
+
+![Instal·lació DHCP](./Photos/Sprint%201/DHCP1.png)
+```bash
+sudo apt install isc-dhcp-server
+```
 
 ---
 
@@ -336,6 +339,23 @@ Instal·lació del paquet `isc-dhcp-server` al servidor Ubuntu.
 Configuració del fitxer `/etc/dhcp/dhcpd.conf` amb el rang d'IPs (192.168.60.30-100), gateway (192.168.60.1), DNS (8.8.8.8, 4.4.4.4) i reserva estàtica per adminPC (192.168.60.20).
 
 ![Configuració dhcpd.conf](./Photos/Sprint%201/DHCP2.png)
+```bash
+sudo nano /etc/dhcp/dhcpd.conf
+```
+```conf
+subnet 192.168.60.0 netmask 255.255.255.0 {
+    range 192.168.60.30 192.168.60.100;
+    option routers 192.168.60.1;
+    option subnet-mask 255.255.255.0;
+    option domain-name-servers 8.8.8.8, 4.4.4.4;
+    option domain-name "D-N03";
+}
+
+host adminPC {
+    hardware ethernet 52:54:00:5a:73:f9;
+    fixed-address 192.168.60.20;
+}
+```
 
 ---
 
@@ -344,7 +364,9 @@ Configuració del fitxer `/etc/dhcp/dhcpd.conf` amb el rang d'IPs (192.168.60.30
 Verificació que el servei DHCP està actiu i funcionant correctament (status active/running).
 
 ![Estat servei DHCP](./Photos/Sprint%201/DHCP3.png)
-
+```bash
+sudo systemctl status isc-dhcp-server
+```
 
 ---
 
@@ -354,6 +376,10 @@ Configuració del client Ubuntu per obtenir IP automàticament via DHCP i DNS ma
 
 ![Configuració client Ubuntu](./Photos/Sprint%201/DHCP4.png)
 
+**Configuració a la interfície gràfica:**
+- Mètode IPv4: Automàtic (DHCP)
+- DNS: 192.168.60.20
+
 ---
 
 #### Pas 5: Verificació IP assignada - Client Ubuntu
@@ -361,6 +387,14 @@ Configuració del client Ubuntu per obtenir IP automàticament via DHCP i DNS ma
 Verificació que el client Ubuntu ha rebut la IP 192.168.60.30 del pool DHCP.
 
 ![IP client Ubuntu](./Photos/Sprint%201/DHCP5.png)
+```bash
+ip a | grep enp3s0
+```
+
+**Sortida esperada:**
+```
+inet 192.168.60.30/24 brd 192.168.60.255 scope global dynamic noprefixroute enp3s0
+```
 
 ---
 
@@ -369,6 +403,18 @@ Verificació que el client Ubuntu ha rebut la IP 192.168.60.30 del pool DHCP.
 Verificació que el client Windows ha rebut la IP 192.168.60.31 del servidor DHCP amb gateway 192.168.60.1.
 
 ![IP client Windows](./Photos/Sprint%201/DHCP6.png)
+```cmd
+ipconfig
+```
+
+**Sortida esperada:**
+```
+Adaptador de Ethernet Ethernet:
+   Sufijo DNS específico para la conexión. . : D-N03
+   Dirección IPv4. . . . . . . . . . . . . : 192.168.60.31
+   Máscara de subred . . . . . . . . . . . : 255.255.255.0
+   Puerta de enlace predeterminada . . . . : 192.168.60.1
+```
 
 ---
 
@@ -377,6 +423,25 @@ Verificació que el client Windows ha rebut la IP 192.168.60.31 del servidor DHC
 Comprovació del fitxer de leases que mostra l'assignació d'IP al client Windows (DESKTOP-JNU2BQU amb IP dinàmica).
 
 ![Fitxer leases DHCP](./Photos/Sprint%201/DHCP7.png)
+```bash
+sudo tail -f /var/lib/dhcp/dhcpd.leases
+```
+
+**Exemple de sortida:**
+```
+lease 192.168.60.31 {
+  starts 2 2025/10/14 14:38:11;
+  ends 2 2025/10/14 14:28:11;
+  cltt 2 2025/10/14 14:28:11;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 52:54:00:52:e7:a3;
+  uid "\001RT\000R\347\243";
+  set vendor-class-identifier = "MSFT 5.0";
+  client-hostname "DESKTOP-JNU2BQU";
+}
+```
 
 ---
 
