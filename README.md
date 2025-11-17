@@ -468,7 +468,7 @@ sudo named-checkconf
 sudo named-checkzone grup6.itb.cat /etc/bind/db.grup6.itb.cat
 sudo named-checkzone 60.168.192.in-addr.arpa /etc/bind/db.192.168.60
 ```
-
+d
 ---
 
 ### Configuració DHCP Server
@@ -611,6 +611,20 @@ Pantalla d'inici de sessió del sistema Ubuntu Server amb els usuaris isardVDI, 
 Edició del fitxer `/etc/hosts` assignant el nom "R-N01" al localhost (127.0.1.1) per identificar correctament el router a la xarxa.
 
 ![Configuració hosts](./Photos/Sprint%201/R2.png)
+```bash
+sudo nano /etc/hosts
+```
+```conf
+127.0.0.1       localhost
+127.0.1.1       R-N01
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+```
 
 ---
 
@@ -622,6 +636,34 @@ Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la conf
 - **enp3s0:** Intranet amb IP 192.168.60.1/24 (52:54:00:1d:14:5e)
 
 ![Configuració Netplan](./Photos/Sprint%201/R3.png)
+```bash
+sudo cat /etc/netplan/01-network-manager-all.yaml
+```
+```yaml
+# Let NetworkManager manage all devices on this system
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    enp1s0:
+      match:
+        macaddress: 52:54:00:34:64:69
+      dhcp4: true
+      optional: true
+    enp2s0:
+      match:
+        macaddress: 52:54:00:38:57:0d
+      addresses:
+        - 192.168.6.1/24      # DMZ
+    enp3s0:
+      match:
+        macaddress: 52:54:00:1d:14:5e
+      addresses:
+        - 192.168.60.1/24     # Intranet
+```
+```bash
+sudo netplan apply
+```
 
 ---
 
@@ -630,6 +672,28 @@ Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la conf
 Comprovació amb `ip a` de l'estat de totes les interfícies de xarxa del router. Es poden veure les tres interfícies configurades i actives amb les seves respectives adreces IP i MAC.
 
 ![Estat interfícies](./Photos/Sprint%201/R4.png)
+```bash
+ip a
+```
+
+**Sortida esperada:**
+```
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536
+    link/loopback 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500
+    link/ether 52:54:00:34:64:69
+    inet 192.168.120.72/22 brd 192.168.123.255 scope global dynamic enp1s0
+
+3: enp2s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500
+    link/ether 52:54:00:38:57:0d
+    inet 192.168.6.1/24 brd 192.168.6.255 scope global enp2s0
+
+4: enp3s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500
+    link/ether 52:54:00:1d:14:5e
+    inet 192.168.60.1/24 brd 192.168.60.255 scope global enp3s0
+```
 
 ---
 
@@ -643,6 +707,31 @@ Configuració completa de les regles d'iptables per gestionar el tràfic entre l
 Les regles es guarden amb `iptables-save` al fitxer `/etc/iptables/rules.v4`.
 
 ![Regles iptables](./Photos/Sprint%201/R5.png)
+```bash
+# === POLÍTIQUES PER DEFECTE ===
+sudo iptables -P FORWARD DROP
+
+# === NAT ===
+sudo iptables -t nat -A POSTROUTING -o enp1s0 -j MASQUERADE
+
+# === INTERNET ⟷ DMZ ===
+sudo iptables -A FORWARD -i enp1s0 -o enp2s0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A FORWARD -i enp2s0 -o enp1s0 -j ACCEPT
+
+# === INTRANET → DMZ ===
+sudo iptables -A FORWARD -i enp3s0 -o enp2s0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -j ACCEPT
+
+# === DMZ → INTRANET (NOMÉS WEB → BBDD) ===
+sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -s 192.168.6.10 -d 192.168.60.20 -p tcp --dport 3306 -j ACCEPT
+sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -j DROP
+
+# === INTRANET → DMZ (clients poden accedir) ===
+sudo iptables -A FORWARD -i enp3s0 -o enp2s0 -j ACCEPT
+
+# === GUARDAR CONFIGURACIÓ ===
+sudo iptables-save | sudo tee /etc/iptables/rules.v4
+```
 
 ---
 
@@ -651,6 +740,25 @@ Les regles es guarden amb `iptables-save` al fitxer `/etc/iptables/rules.v4`.
 Comprovació amb `ip route show` de les rutes configurades i verificació amb `iptables -L -n -v` de totes les cadenes (INPUT, FORWARD, OUTPUT, PREROUTING, POSTROUTING) amb les regles actives i estadístiques de paquets processats.
 
 ![Taules de rutes i verificació](./Photos/Sprint%201/R6.png)
+```bash
+# Mostrar rutes
+ip route show
+
+# Verificar regles iptables
+sudo iptables -L -n -v
+
+# Verificar regles NAT
+sudo iptables -t nat -L -n -v
+```
+
+**Sortida esperada de `ip route show`:**
+```
+default via 192.168.120.1 dev enp1s0 proto dhcp src 192.168.120.72 metric 100
+192.168.6.0/24 dev enp2s0 proto kernel scope link src 192.168.6.1
+192.168.60.0/24 dev enp3s0 proto kernel scope link src 192.168.60.1
+192.168.120.0/22 dev enp1s0 proto kernel scope link src 192.168.120.72 metric 100
+192.168.120.1 dev enp2s0 proto dhcp scope link src 192.168.120.72 metric 100
+```
 
 ---
 
@@ -664,8 +772,64 @@ Proves de ping des del router cap als servidors de la xarxa Intranet:
 Totes les proves mostren 0% packet loss confirmant la correcta configuració del router.
 
 ![Proves connectivitat](./Photos/Sprint%201/R7.png)
+```bash
+# DNS - Servidor de Base de Dades
+ping -c 4 192.168.60.20
+
+# Client Ubuntu (DHCP)
+ping -c 4 192.168.60.30
+
+# Client Windows (DHCP)
+ping -c 4 192.168.60.31
+```
+
+**Sortida esperada:**
+```
+# DNS
+PING 192.168.60.20 (192.168.60.20) 56(84) bytes of data.
+64 bytes from 192.168.60.20: icmp_seq=1 ttl=64 time=1.55 ms
+64 bytes from 192.168.60.20: icmp_seq=2 ttl=64 time=0.349 ms
+64 bytes from 192.168.60.20: icmp_seq=3 ttl=64 time=0.464 ms
+64 bytes from 192.168.60.20: icmp_seq=4 ttl=64 time=0.384 ms
+--- 192.168.60.20 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3039ms
+
+# Cliente Ubuntu
+PING 192.168.60.30 (192.168.60.30) 56(84) bytes of data.
+64 bytes from 192.168.60.30: icmp_seq=1 ttl=64 time=1.64 ms
+64 bytes from 192.168.60.30: icmp_seq=2 ttl=64 time=0.386 ms
+64 bytes from 192.168.60.30: icmp_seq=3 ttl=64 time=0.308 ms
+64 bytes from 192.168.60.30: icmp_seq=4 ttl=64 time=0.351 ms
+--- 192.168.60.30 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3046ms
+
+# Cliente Windows
+PING 192.168.60.31 (192.168.60.31) 56(84) bytes of data.
+64 bytes from 192.168.60.31: icmp_seq=1 ttl=128 time=1.65 ms
+64 bytes from 192.168.60.31: icmp_seq=2 ttl=128 time=0.583 ms
+64 bytes from 192.168.60.31: icmp_seq=3 ttl=128 time=0.500 ms
+64 bytes from 192.168.60.31: icmp_seq=4 ttl=128 time=0.452 ms
+--- 192.168.60.31 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3034ms
+```
+
+**Habilitar IP Forwarding permanent:**
+```bash
+sudo nano /etc/sysctl.conf
+```
+
+Descomentar la línea:
+```conf
+net.ipv4.ip_forward=1
+```
+
+Aplicar cambios:
+```bash
+sudo sysctl -p
+```
 
 ---
+
 
 ## Sprint 2 - Configuració del Servidor Web
 
