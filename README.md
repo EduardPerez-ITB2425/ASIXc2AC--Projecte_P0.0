@@ -234,6 +234,30 @@ Aquesta arquitectura implementa les **millors pràctiques de seguretat en xarxes
 Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la configuració de la interfície enp3s0 del servidor DNS amb IP estàtica 192.168.6.20/24, gateway 192.168.6.1 i servidors DNS externs (8.8.8.8 i 8.8.4.4).
 
 ![Configuració Netplan DNS](./Photos/Sprint%201/DNS1.png)
+```bash
+sudo cat /etc/netplan/01-network-manager-all.yaml
+```
+```yaml
+# Let NetworkManager manage all devices on this system
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+    enp3s0:
+      dhcp4: no
+      addresses:
+        - 192.168.6.20/24
+      routes:
+        - to: default
+          via: 192.168.6.1
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4
+```
+```bash
+sudo netplan apply
+```
 
 ---
 
@@ -242,6 +266,21 @@ Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la conf
 Creació de l'usuari `bchecker` amb el grup bchecker (1001) mitjançant la comanda `sudo adduser bchecker`. Es configura el directori personal i la contrasenya per complir amb els requisits del projecte.
 
 ![Creació usuari bchecker](./Photos/Sprint%201/DNS2.png)
+```bash
+sudo adduser bchecker
+```
+
+**Sortida esperada:**
+```
+Añadiendo el usuario `bchecker' ...
+Añadiendo el nuevo grupo `bchecker' (1001) ...
+Añadiendo el nuevo usuario `bchecker' (1001) con grupo `bchecker' ...
+Creando el directorio personal `/home/bchecker' ...
+Copiando los ficheros desde `/etc/skel' ...
+Nueva contraseña:
+Vuelva a escribir la nueva contraseña:
+passwd: contraseña actualizada correctamente
+```
 
 ---
 
@@ -256,6 +295,28 @@ Visualització del fitxer `/etc/bind/named.conf.options` amb la configuració de
 - DNSSEC validation en mode auto
 
 ![Configuració named.conf.options](./Photos/Sprint%201/DNS3.png)
+```bash
+sudo nano /etc/bind/named.conf.options
+```
+```conf
+options {
+    directory "/var/cache/bind";
+
+    allow-query { any; };
+    recursion yes;
+
+    listen-on port 53 { any; };
+    listen-on-v6 { any; };
+
+    forwarders {
+        8.8.8.8;
+        8.8.4.4;
+    };
+
+    dnssec-validation auto;
+    auth-nxdomain no;
+};
+```
 
 ---
 
@@ -266,6 +327,28 @@ Visualització del fitxer `/etc/bind/named.conf.local` amb la definició de les 
 - **Zona inversa "60.168.192.in-addr.arpa":** Tipus master amb fitxer `/etc/bind/db.192.168.60`
 
 ![Configuració named.conf.local](./Photos/Sprint%201/DNS4.png)
+```bash
+sudo nano /etc/bind/named.conf.local
+```
+```conf
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "grup6.itb.cat" {
+    type master;
+    file "/etc/bind/db.grup6.itb.cat";
+};
+
+zone "60.168.192.in-addr.arpa" {
+    type master;
+    file "/etc/bind/db.192.168.60";
+};
+```
 
 ---
 
@@ -277,6 +360,21 @@ Contingut del fitxer `/etc/bind/db.grup6.itb.cat` amb els registres DNS:
 - **A:** Registre que apunta DN-03 a la IP 192.168.60.20
 
 ![Zona directa grup6.itb.cat](./Photos/Sprint%201/DNS5.png)
+```bash
+sudo nano /etc/bind/db.grup6.itb.cat
+```
+```conf
+$TTL    604800
+@       IN      SOA     DN-03.grup6.itb.cat. admin.grup6.itb.cat. (
+                        2025101401 ; Serial
+                        604800     ; Refresh
+                        86400      ; Retry
+                        2419200    ; Expire
+                        604800 )   ; Negative Cache TTL
+;
+@       IN      NS      DN-03.grup6.itb.cat.
+DN-03   IN      A       192.168.60.20
+```
 
 ---
 
@@ -288,6 +386,21 @@ Contingut del fitxer `/etc/bind/db.192.168.60` amb els registres de resolució i
 - **PTR:** Registre que apunta 20 (192.168.60.20) a DN-03.grup6.itb.cat
 
 ![Zona inversa 192.168.60](./Photos/Sprint%201/DNS6.png)
+```bash
+sudo nano /etc/bind/db.192.168.60
+```
+```conf
+$TTL    604800
+@       IN      SOA     DN-03.grup6.itb.cat. admin.grup6.itb.cat. (
+                        2025101401 ; Serial
+                        604800     ; Refresh
+                        86400      ; Retry
+                        2419200    ; Expire
+                        604800 )   ; Negative Cache TTL
+;
+@       IN      NS      DN-03.grup6.itb.cat.
+20      IN      PTR     DN-03.grup6.itb.cat.
+```
 
 ---
 
@@ -296,6 +409,9 @@ Contingut del fitxer `/etc/bind/db.192.168.60` amb els registres de resolució i
 Comprovació addicional del contingut del fitxer `/etc/bind/db.192.168.60` confirmant la correcta configuració dels registres PTR per a la resolució inversa.
 
 ![Verificació zona inversa](./Photos/Sprint%201/DNS7.png)
+```bash
+cat /etc/bind/db.192.168.60
+```
 
 ---
 
@@ -309,6 +425,22 @@ Visualització del fitxer `/etc/bind/named.conf` que inclou els fitxers de confi
 Aquest és el fitxer principal que carrega tota la configuració del servidor BIND9.
 
 ![Configuració named.conf](./Photos/Sprint%201/DNS8.png)
+```bash
+cat /etc/bind/named.conf
+```
+```conf
+// This is the primary configuration file for the BIND DNS server named.
+//
+// Please read /usr/share/doc/bind9/README.Debian.gz for information on the
+// structure of BIND configuration files in Debian, *BEFORE* you customize
+// this configuration file.
+//
+// If you are just adding zones, please do that in /etc/bind/named.conf.local
+
+include "/etc/bind/named.conf.options";
+include "/etc/bind/named.conf.local";
+include "/etc/bind/named.conf.default-zones";
+```
 
 ---
 
@@ -317,9 +449,27 @@ Aquest és el fitxer principal que carrega tota la configuració del servidor BI
 Comprovació amb `sudo systemctl status bind9` que el servei named.service està actiu i funcionant correctament (active/running). Es pot veure que el servei va arrencar correctament i està escoltant en les interfícies IPv6 enp4s0 i enp5s0.
 
 ![Estat servei BIND9](./Photos/Sprint%201/DNS9.png)
+```bash
+sudo systemctl status bind9
+```
+
+**Comandos addicionals:**
+```bash
+# Reiniciar el servei
+sudo systemctl restart bind9
+
+# Habilitar el servei a l'inici
+sudo systemctl enable bind9
+
+# Verificar la configuració
+sudo named-checkconf
+
+# Verificar zones
+sudo named-checkzone grup6.itb.cat /etc/bind/db.grup6.itb.cat
+sudo named-checkzone 60.168.192.in-addr.arpa /etc/bind/db.192.168.60
+```
 
 ---
-
 
 ### Configuració DHCP Server
 
