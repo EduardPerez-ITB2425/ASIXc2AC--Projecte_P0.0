@@ -1413,13 +1413,13 @@ Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgi
 - **IPv6 Support:** enabled
 
 **Mòduls verificats:**
-- mysqli ✅
-- pdo_mysql ✅
-- json ✅
-- mbstring ✅
-- xml ✅
-- curl ✅
-- gd ✅
+- mysqli 
+- pdo_mysql 
+- json 
+- mbstring 
+- xml 
+- curl 
+- gd 
 ```bash
 # Opcio opcional: Eliminar test.php després de verificar
 # sudo rm /var/www/html/test.php
@@ -1435,6 +1435,9 @@ Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgi
 Instal·lació del paquet `mysql-server` amb la comanda `sudo apt install mysql-server`. El sistema descarrega i instal·la automàticament tots els paquets necessaris incloent llibreries perl, llibcgi, libevent, mecab i les dependències de MySQL 8.0.
 
 ![Instal·lació MySQL Server](./Photos/sprint%202/BBDD/BBDD1.png)
+```bash
+sudo apt install mysql-server
+```
 
 ---
 
@@ -1443,6 +1446,24 @@ Instal·lació del paquet `mysql-server` amb la comanda `sudo apt install mysql-
 Script SQL per crear la taula `equipaments` amb els camps: register_id (VARCHAR 50), nom (VARCHAR 255 NOT NULL), institution_id (VARCHAR 50), institution_name (VARCHAR 255), created i modified (TIMESTAMP), geo_x i geo_y (FLOAT), latitude i longitude (FLOAT), estimated_dates (VARCHAR 100), start_date i end_date (DATE), i timetable (TEXT).
 
 ![Taula equipaments](./Photos/sprint%202/BBDD/BBDD2.png)
+```sql
+CREATE TABLE equipaments (
+    register_id VARCHAR(50),
+    nom VARCHAR(255) NOT NULL,
+    institution_id VARCHAR(50),
+    institution_name VARCHAR(255),
+    created TIMESTAMP,
+    modified TIMESTAMP,
+    geo_x FLOAT,
+    geo_y FLOAT,
+    latitude FLOAT,
+    longitude FLOAT,
+    estimated_dates VARCHAR(100),
+    start_date DATE,
+    end_date DATE,
+    timetable TEXT
+);
+```
 
 ---
 
@@ -1451,6 +1472,26 @@ Script SQL per crear la taula `equipaments` amb els camps: register_id (VARCHAR 
 Script SQL per crear la taula `direccions` amb clau forana (FOREIGN KEY) referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), roadtype_id, roadtype_name, road_id, road_name (VARCHAR 255), start_street_number i end_street_number (VARCHAR 10), neighborhood_id, neighborhood_name, district_id, district_name (VARCHAR 100), zip_code (VARCHAR 10), town (VARCHAR 100), main_address i address_type (VARCHAR 50).
 
 ![Taula direccions](./Photos/sprint%202/BBDD/BBDD3.png)
+```sql
+CREATE TABLE direccions (
+    equipament_id VARCHAR(50),           -- Referencia a equipaments
+    roadtype_id VARCHAR(50),
+    roadtype_name VARCHAR(100),
+    road_id VARCHAR(50),
+    road_name VARCHAR(255),
+    start_street_number VARCHAR(10),
+    end_street_number VARCHAR(10),
+    neighborhood_id VARCHAR(50),
+    neighborhood_name VARCHAR(100),
+    district_id VARCHAR(50),
+    district_name VARCHAR(100),
+    zip_code VARCHAR(10),
+    town VARCHAR(100),
+    main_address VARCHAR(50),
+    address_type VARCHAR(50),
+    FOREIGN KEY (equipament_id) REFERENCES equipaments(register_id)
+);
+```
 
 ---
 
@@ -1459,6 +1500,19 @@ Script SQL per crear la taula `direccions` amb clau forana (FOREIGN KEY) referen
 Script SQL per crear la taula `valors` amb clau forana referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), attribute_id (VARCHAR 50), values_id (VARCHAR 50), category (VARCHAR 100), attribute_name (VARCHAR 100), value (VARCHAR 255), outstanding (VARCHAR 50), i description (TEXT).
 
 ![Taula valors](./Photos/sprint%202/BBDD/BBDD4.png)
+```sql
+CREATE TABLE valors (
+    equipament_id VARCHAR(50),
+    attribute_id VARCHAR(50),
+    values_id VARCHAR(50),
+    category VARCHAR(100),
+    attribute_name VARCHAR(100),
+    value VARCHAR(255),
+    outstanding VARCHAR(50),
+    description TEXT,
+    FOREIGN KEY (equipament_id) REFERENCES equipaments(register_id)
+);
+```
 
 ---
 
@@ -1467,6 +1521,17 @@ Script SQL per crear la taula `valors` amb clau forana referenciada a equipament
 Script SQL per crear la taula `filtres_secundaris` amb clau forana referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), filter_id (VARCHAR 50), filter_name (VARCHAR 255), filter_fullpath (TEXT), filter_tree (VARCHAR 255), i filter_asia_id (VARCHAR 50).
 
 ![Taula filtres_secundaris](./Photos/sprint%202/BBDD/BBDD5.png)
+```sql
+CREATE TABLE filtres_secundaris (
+    equipament_id VARCHAR(50),
+    filter_id VARCHAR(50),
+    filter_name VARCHAR(255),
+    filter_fullpath TEXT,
+    filter_tree VARCHAR(255),
+    filter_asia_id VARCHAR(50),
+    FOREIGN KEY (equipament_id) REFERENCES equipaments(register_id)
+);
+```
 
 ---
 
@@ -1475,6 +1540,9 @@ Script SQL per crear la taula `filtres_secundaris` amb clau forana referenciada 
 Execució de la comanda `SHOW TABLES;` a MySQL mostrant les 4 taules creades correctament a la base de dades EquipamentsBCN: direccions, equipaments, filtres_secundaris i valors. El resultat mostra "4 rows in set (0,01 sec)".
 
 ![Verificació taules MySQL](./Photos/sprint%202/BBDD/BBDD6.png)
+```sql
+SHOW TABLES;
+```
 
 ---
 
@@ -1483,6 +1551,9 @@ Execució de la comanda `SHOW TABLES;` a MySQL mostrant les 4 taules creades cor
 Execució de la comanda `SHOW COLUMNS FROM equipaments;` mostrant l'estructura completa de la taula amb 14 camps: register_id (PRI, varchar 50), nom (varchar 255), institution_id, institution_name, created i modified (timestamp), geo_x, geo_y, latitude i longitude (float), estimated_dates (varchar 100), start_date i end_date (date), i timetable (text).
 
 ![Columnes taula equipaments](./Photos/sprint%202/BBDD/BBDD7.png)
+```sql
+SHOW COLUMNS FROM equipaments;
+```
 
 ---
 
@@ -1491,6 +1562,9 @@ Execució de la comanda `SHOW COLUMNS FROM equipaments;` mostrant l'estructura c
 Execució de la comanda `SHOW COLUMNS FROM direccions;` mostrant l'estructura completa amb 15 camps. Equipment_id està configurat com a MUL (clau múltiple/forana) referenciant la taula equipaments. Tots els camps són VARCHAR excepte address_type, amb mides que varien entre VARCHAR(10) i VARCHAR(255).
 
 ![Columnes taula direccions](./Photos/sprint%202/BBDD/BBDD8.png)
+```sql
+SHOW COLUMNS FROM direccions;
+```
 
 ---
 
@@ -1499,6 +1573,9 @@ Execució de la comanda `SHOW COLUMNS FROM direccions;` mostrant l'estructura co
 Execució de la comanda `SHOW COLUMNS FROM valors;` mostrant l'estructura amb 8 camps. Equipment_id està configurat com a MUL (clau forana). Els camps inclouen: equipment_id, attribute_id, values_id (VARCHAR 50), category i attribute_name (VARCHAR 100), value (VARCHAR 255), outstanding (VARCHAR 50) i description (TEXT).
 
 ![Columnes taula valors](./Photos/sprint%202/BBDD/BBDD9.png)
+```sql
+SHOW COLUMNS FROM valors;
+```
 
 ---
 
@@ -1507,6 +1584,9 @@ Execució de la comanda `SHOW COLUMNS FROM valors;` mostrant l'estructura amb 8 
 Execució de la comanda `SHOW COLUMNS FROM filtres_secundaris;` mostrant l'estructura amb 6 camps. Equipment_id està configurat com a MUL (clau forana). Els camps inclouen: equipment_id, filter_id (VARCHAR 50), filter_name (VARCHAR 255), filter_fullpath (TEXT), filter_tree (VARCHAR 255) i filter_asia_id (VARCHAR 50).
 
 ![Columnes taula filtres_secundaris](./Photos/sprint%202/BBDD/BBDD10.png)
+```sql
+SHOW COLUMNS FROM filtres_secundaris;
+```
 
 ---
 
