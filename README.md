@@ -831,7 +831,6 @@ sudo sysctl -p
 ---
 
 
-## Sprint 2 - Configuració del Servidor Web
 
 ## Sprint 2 - Configuració del Servidor Web
 
@@ -1330,6 +1329,100 @@ sudo nano /etc/apache2/mods-enabled/dir.conf
 ```bash
 # Reiniciar Apache
 sudo systemctl restart apache2
+```
+---
+
+#### Pas 20: Verificació de la instal·lació de PHP i mòduls
+
+Comprovació de la versió de PHP instal·lada mostrant PHP 8.1.2-1ubuntu2.22 amb Zend Engine v4.1.2 i Zend OPcache v8.1.2. S'executa la comanda `php -m | grep -E 'mysqli|pdo'` per verificar que els mòduls mysqli i pdo_mysql estan instal·lats correctament.
+
+![Verificació PHP i mòduls](./Photos/sprint%202/web/20.png)
+```bash
+# Verificar versió de PHP
+php -v
+
+# Verificar mòduls mysqli i pdo
+php -m | grep -E 'mysqli|pdo'
+```
+
+**Sortida esperada:**
+```
+PHP 8.1.2-1ubuntu2.22 (cli) (built: Jul 15 2025 12:11:22) (NTS)
+Copyright (c) The PHP Group
+Zend Engine v4.1.2, Copyright (c) Zend Technologies
+    with Zend OPcache v8.1.2-1ubuntu2.22, Copyright (c), by Zend Technologies
+
+mysqli
+pdo_mysql
+```
+```bash
+# Editar configuració DirectoryIndex
+sudo nano /etc/apache2/mods-enabled/dir.conf
+```
+
+---
+
+#### Pas 21: Creació de l'arxiu test.php i configuració de permisos
+
+Creació de l'arxiu `/var/www/html/test.php` amb la funció `phpinfo();` per mostrar la informació de configuració de PHP. Es configuren els permisos adequats amb `chown www-data:www-data` i `chmod 644`. Es verifica el contingut del fitxer mostrant el codi PHP bàsic.
+
+![Creació test.php](./Photos/sprint%202/web/21.png)
+```bash
+# Crear fitxer test.php
+sudo nano /var/www/html/test.php
+```
+```php
+<?php
+phpinfo();
+?>
+```
+```bash
+# Configurar propietari i permisos
+sudo chown www-data:www-data /var/www/html/test.php
+sudo chmod 644 /var/www/html/test.php
+
+# Verificar contingut
+cat /var/www/html/test.php
+```
+
+**Accedir des del navegador:**
+```
+http://192.168.6.10/test.php
+```
+
+---
+
+#### Pas 22: Accés web a test.php i verificació completa de PHP
+
+Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgina d'informació de PHP (phpinfo). Es visualitza la versió PHP 8.1.2-1ubuntu2.22 amb informació detallada del sistema, build date, server API, directives de configuració, PHP Extension, Zend Extension i altres paràmetres tècnics del servidor PHP. Aquesta pàgina confirma que PHP està correctament integrat amb Apache2 i que tots els mòduls necessaris estan carregats.
+
+![Visualització phpinfo()](./Photos/sprint%202/web/22.png)
+
+**Informació mostrada al phpinfo():**
+- **PHP Version:** 8.1.2-1ubuntu2.22
+- **System:** Linux
+- **Build Date:** Apr 4 14:35
+- **Server API:** Apache 2.0 Handler
+- **PHP API:** 20210902
+- **PHP Extension:** 20210902
+- **Zend Extension:** 420210902
+- **Debug Build:** no
+- **Thread Safety:** disabled
+- **Zend Signal Handling:** enabled
+- **Zend Memory Manager:** enabled
+- **IPv6 Support:** enabled
+
+**Mòduls verificats:**
+- mysqli ✅
+- pdo_mysql ✅
+- json ✅
+- mbstring ✅
+- xml ✅
+- curl ✅
+- gd ✅
+```bash
+# Opcio opcional: Eliminar test.php després de verificar
+# sudo rm /var/www/html/test.php
 ```
 
 ---
