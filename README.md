@@ -377,7 +377,7 @@ L'ús de **Windows 11** per al client aporta diversitat al sistema i permet prov
 ---
 
 
-## Sprint 1 - Configuració Serveis de Xarxa
+## 1 - Configuració Serveis de Xarxa
 
 ### Configuració DNS Server (D-N03)
 
@@ -884,7 +884,7 @@ sudo sysctl -p
 
 
 
-## Sprint 2 - Configuració del Servidor Web
+## 2 - Configuració del Servidor Web
 
 ### Configuració Web Server (W-N02)
 
