@@ -114,24 +114,40 @@ Aquesta segmentació proporciona **aïllament lògic** entre les diferents zones
 
 ---
 
+## Justificació de l'Estructura i Tecnologia de Xarxa
+
+### Arquitectura General
+
+#### Router Central amb Tres Interfícies (R-N01)
+L'arquitectura proposada utilitza un **router amb tres interfícies** que segmenta la xarxa en tres zones diferents:
+- **Interfície NAT** (cap a Internet)
+- **Interfície DMZ** (192.168.6.0/24)
+- **Interfície Intranet** (192.168.60.0/24)
+
+Aquesta segmentació proporciona **aïllament lògic** entre les diferents zones de seguretat, permetent aplicar polítiques de firewall específiques per a cada segment.
+
+---
+
 ### Zona DMZ (192.168.6.0/24)
 
 #### Justificació de Serveis Públics
 
 ##### Web Server (W-N02) - 192.168.6.10
-- **Tecnologia**: Apache/Nginx amb SSH
+- **Tecnologia**: Apache2 amb PHP 8.1 sobre Ubuntu 22.04 Desktop
 - **Justificació**: 
   - Servidor web accessible des d'Internet per allotjar l'aplicació web pública
-  - SSH permet administració remota segura
+  - SSH al port 2222 permet administració remota segura
   - Ubicat a la DMZ per protegir la xarxa interna d'amenaces externes
   - En cas de compromís, no exposa directament la xarxa interna
+  - Apache2 ofereix alta estabilitat i compatibilitat amb PHP
 
 ##### FTP Server (F-N02) - 192.168.6.11
-- **Tecnologia**: vsftpd/ProFTPD
+- **Tecnologia**: vsftpd sobre Ubuntu 22.04 Desktop
 - **Justificació**:
-  - Transferència d'arxius des de/cap a l'exterior
+  - Transferència segura d'arxius des de/cap a l'exterior
   - Separat del servidor web per limitar l'impacte de vulnerabilitats
-  - Permet gestió d'arxius sense accés directe al servidor web
+  - vsftpd és conegut per la seva seguretat (Very Secure FTP Daemon)
+  - Configuració chroot evita accés no autoritzat al sistema de fitxers
 
 #### Avantatges de la DMZ
 - **Capa de seguretat addicional**: Els servidors públics estan aïllats de la xarxa interna
@@ -142,35 +158,98 @@ Aquesta segmentació proporciona **aïllament lògic** entre les diferents zones
 
 ### Zona Intranet (192.168.60.0/24)
 
-#### Database Server (B-N03) - 192.168.60.15
-- **Tecnologia**: MySQL
+#### Database Server (B-N03) - 192.168.60.20
+- **Tecnologia**: MySQL 8.0 sobre Ubuntu 22.04 Desktop
 - **Justificació**:
   - **Base de dades protegida**: No està directament accessible des d'Internet
   - **Dades sensibles segures**: Emmagatzema informació de "CSV Educación BCN" amb usuari "bchecker"
-  - **Accés controlat**: Només accessible des de la xarxa interna i mitjançant regles específiques des de la DMZ
-  - Redueix significativament el risc d'atacs d'injecció SQL des de l'exterior
+  - **Accés controlat**: Només accessible des de la xarxa interna i mitjançant regles específiques des de la DMZ (port 3306)
+  - MySQL 8.0 ofereix millores significatives en rendiment i seguretat respecte a versions anteriors
+  - Suport natiu per a JSON i millor gestió de transaccions
 
 #### DHCP Server - 192.168.60.20
-- **Rang**: 30-100
+- **Tecnologia**: isc-dhcp-server sobre Ubuntu 22.04 Desktop
+- **Rang**: 192.168.60.30-100
 - **Justificació**:
   - **Gestió automàtica d'IPs**: Facilita l'administració de clients
   - **Escalabilitat**: Permet agregar nous dispositius sense configuració manual
   - **Rang controlat**: El rang 30-100 permet 71 adreces dinàmiques, deixant les primeres IPs per a serveis estàtics
+  - isc-dhcp-server és l'estàndard de facto en entorns Linux
 
 #### DNS Server - 192.168.60.20
-- **Funció**: Resol R-N01, R
+- **Tecnologia**: BIND9 sobre Ubuntu 22.04 Desktop
+- **Domini**: grup6.itb.cat
 - **Justificació**:
   - **Resolució de noms interna**: Facilita l'accés als recursos per nom en lloc d'IP
   - **Simplificació de gestió**: Els canvis d'IP no afecten les aplicacions que usen noms
-  - **Centralització**: Mateix servidor que DHCP per eficiència
+  - **Centralització**: Mateix servidor que DHCP per eficiència de recursos
+  - BIND9 és el servidor DNS més utilitzat i fiable
 
-#### Clients (PC Windows i PC Linux)
-- **Configuració**: DHCP
-- **IPs**: 192.168.60.x
+#### Clients
+- **PC Ubuntu 22.04 Desktop**: Client Linux amb IP DHCP (192.168.60.30)
+- **PC Windows 11**: Client Windows amb IP DHCP (192.168.60.31)
 - **Justificació**:
-  - **Flexibilitat**: Els usuaris no necessiten coneixements de xarxa
+  - **Flexibilitat**: Els usuaris no necessiten coneixements tècnics de xarxa
   - **Mobilitat**: Els dispositius poden canviar d'ubicació sense reconfiguració
-  - **Gestió centralitzada**: Canvis de configuració es realitzen al servidor DHCP
+  - **Gestió centralitzada**: Tots els canvis es realitzen al servidor DHCP
+  - Diversitat de sistemes operatius per simular un entorn real d'oficina
+
+---
+
+### Selecció de Sistemes Operatius
+
+#### Per què Ubuntu 22.04 Desktop en lloc de Server?
+
+**Avantatges per al projecte:**
+
+1. **Interfície gràfica disponible**: Facilita la configuració inicial i resolució de problemes durant el desenvolupament
+2. **Eines de diagnòstic visuals**: Permet utilitzar navegadors web i eines gràfiques per verificar el funcionament
+3. **Mateix conjunt de paquets**: Ubuntu Desktop inclou tots els paquets de Server amb interfície addicional
+4. **Flexibilitat de configuració**: Més senzill alternar entre mode gràfic i línia de comandes
+5. **Entorn de proves**: Ideal per a entorns educatius on es necessita visualitzar el que passa
+
+**Per què no Debian 13 Server?**
+
+Tot i que Debian és més lleuger i estable:
+- Ubuntu té millor documentació i comunitat més gran
+- Cicles de suport LTS (22.04) amb 5 anys de manteniment
+- Més familiaritat de l'equip amb l'ecosistema Ubuntu
+- Repositories més actualitzats per a paquets com PHP i MySQL
+
+**Per què no Ubuntu 24.04?**
+
+- La versió 22.04 LTS ofereix més estabilitat provada
+- Millor compatibilitat amb documentació existent
+- Menys problemes potencials amb paquets i dependències
+- Suport estès fins 2027
+
+#### Per què Windows 11 per al client?
+
+**Justificació:**
+
+1. **Representació del món real**: La majoria d'usuaris corporatius utilitzen Windows
+2. **Proves de compatibilitat**: Permet verificar que els serveis funcionen correctament amb clients Windows
+3. **Diversitat de l'entorn**: Combinar Linux i Windows simula un entorn heterogeni real
+4. **Funcionalitats natives**: Eines com `ipconfig` i gestió de xarxa gràfica familiars per als usuaris
+
+**Per què no Windows 10?**
+
+- Windows 11 és la versió actual i té millor suport de seguretat
+- Millores en l'stack de xarxa i gestió de protocols
+- Preparació per a entorns futurs
+
+#### Per què Ubuntu Desktop com a Router?
+
+**Consideracions tècniques:**
+
+1. **iptables preinstal·lat**: Gestió de firewall sense instal·lacions addicionals
+2. **Netplan**: Configuració de xarxa moderna i declarativa
+3. **Flexibilitat**: Permet configurar NAT, forwarding i regles de firewall fàcilment
+4. **Monitorització**: Interfície gràfica per veure l'estat de les interfícies de xarxa
+5. **Aprenentatge**: Més didàctic per entendre el funcionament intern d'un router
+
+**Alternativa no seleccionada:**
+Un router dedicat (pfSense, OpenWrt) seria més eficient en producció, però menys transparent per a propòsits educatius.
 
 ---
 
@@ -181,46 +260,119 @@ Aquesta segmentació proporciona **aïllament lògic** entre les diferents zones
 2. **Principi de mínim privilegi**: Cada zona té accés limitat a les altres
 3. **Protecció de dades**: Base de dades inaccessible des d'Internet
 4. **Punt únic de control**: El router R-N01 gestiona tot el trànsit entre zones
+5. **Regles iptables específiques**: Port forwarding només per MySQL (3306) des de Web a Database
 
 #### Escalabilitat
 - Fàcil afegir nous servidors a la DMZ o Intranet
 - El DHCP permet creixement de clients sense reconfiguració
 - Estructura modular que facilita expansions futures
+- L'ús d'Ubuntu Desktop facilita la migració a Server en producció
 
 #### Mantenibilitat
 - Separació clara de responsabilitats per zona
 - DNS intern simplifica canvis d'infraestructura
 - Serveis especialitzats en servidors dedicats
+- Uniformitat de SO (Ubuntu 22.04) facilita l'administració
+- Un únic tipus de sistema operatiu per als servidors redueix la corba d'aprenentatge
 
 #### Rendiment
 - El trànsit intern (Intranet) no passa per la DMZ
 - La base de dades està a la mateixa xarxa que els clients, reduint latència
 - Serveis distribuïts eviten colls d'ampolla
+- MySQL 8.0 ofereix millores significatives en velocitat de consultes
+
+#### Cost i Recursos
+- Ubuntu Desktop és gratuït i open source
+- No requereix llicències adicionals
+- Requisits de hardware moderats
+- Aprofitament de recursos existents sense necessitat d'hardware especialitzat
 
 ---
 
 ### Flux de Comunicació
 
 #### Accés Extern → Aplicació Web
-1. Usuari d'Internet → R-N01 (NAT)
-2. R-N01 → W-N02 (DMZ)
-3. W-N02 → R-N01 → B-N03 (consulta BD)
-4. Resposta inversa
+1. Usuari d'Internet → R-N01 (NAT via enp1s0)
+2. R-N01 → W-N02 (DMZ via enp2s0 - 192.168.6.10)
+3. W-N02 → R-N01 → B-N03 (consulta MySQL via enp3s0 - 192.168.60.20:3306)
+4. Resposta inversa pel mateix camí
+
+**Seguretat aplicada:**
+- Només el Web Server pot accedir al port 3306 del Database Server
+- Clients externs no tenen accés directe a la Intranet
+- Firewall iptables filtra tot el trànsit no autoritzat
 
 #### Accés Intern
-- Clients (192.168.60.x) → B-N03: Comunicació directa a la mateixa xarxa
-- Clients → Internet: NAT a R-N01
+- **Clients → Database**: Comunicació directa a la mateixa xarxa Intranet
+- **Clients → Web Server**: A través del router R-N01
+- **Clients → Internet**: NAT a R-N01 via enp1s0
+- **Clients → DNS/DHCP**: Accés directe al servidor 192.168.60.20
+
+#### Transferència d'Arxius
+- **FTP Intern**: Empleats poden pujar/descarregar arxius des de la Intranet
+- **FTP Extern**: Accés controlat des d'Internet si es configura port forwarding
+- **SSH**: Administració remota segura dels servidors via port 2222
+
+---
+
+### Comparativa amb Altres Opcions
+
+#### Opció Descartada 1: Windows Server 2022
+
+**Desavantatges:**
+- Cost de llicències
+- Major consum de recursos
+- Menys flexibilitat en configuració de xarxa
+- Corba d'aprenentatge més pronunciada per a serveis com iptables
+
+**Quan seria adequat:**
+- Entorns corporatius 100% Windows
+- Necessitat d'Active Directory
+- Aplicacions que només funcionen en Windows
+
+#### Opció Descartada 2: Debian 13 Server
+
+**Desavantatges:**
+- Menys documentació disponible
+- Paquets més antics (estabilitat vs. funcionalitats recents)
+- Menor comunitat de suport
+
+**Quan seria adequat:**
+- Entorns de producció on la màxima estabilitat és crítica
+- Servidors sense necessitat de depuració visual
+- Administradors amb experiència en Debian
+
+#### Opció Descartada 3: Ubuntu 24.04
+
+**Desavantatges:**
+- Menys temps en producció = menys proves reals
+- Possible incompatibilitat amb algunes llibreries
+- Documentació encara en desenvolupament
+
+**Quan seria adequat:**
+- Necessitat de funcionalitats més modernes
+- Projectes que comencen d'zero sense dependències antigues
 
 ---
 
 ### Conclusió
 
 Aquesta arquitectura implementa les **millors pràctiques de seguretat en xarxes** mitjançant:
-- Defensa en profunditat (múltiples capes de seguretat)
+- Defensa en profunditat amb múltiples capes de seguretat
 - Segmentació de xarxa basada en funcionalitat i nivell d'exposició
 - Serveis crítics protegits a la xarxa interna
 - Serveis públics aïllats a la DMZ
 - Gestió centralitzada i automatitzada de la xarxa interna
+
+La selecció d'**Ubuntu 22.04 Desktop** per als servidors ofereix el millor equilibri entre:
+- Facilitat d'ús i configuració
+- Suport a llarg termini (LTS fins 2027)
+- Compatibilitat amb una àmplia gamma de serveis
+- Cost zero (open source)
+- Flexibilitat per a entorns educatius i de producció
+
+L'ús de **Windows 11** per al client aporta diversitat al sistema i permet provar la interoperabilitat entre plataformes, simulant un entorn corporatiu real on conviuen diferents sistemes operatius.
+
 
 ---
 

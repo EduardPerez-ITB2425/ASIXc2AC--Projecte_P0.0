@@ -259,7 +259,7 @@ Per a problemes tècnics o consultes sobre el sistema:
 
 **Canals de contacte:**
 - Telèfon intern: Extensió 1234
-- Correu electrònic: suport.sistemes@organitzacio.cat
+- Correu electrònic: exemple@exemple.cat
 - Portal d'incidències: http://suport.intern
 
 ### Temps de Resposta
