@@ -1,1370 +1,355 @@
-## Sprint 1 - Configuració Serveis de Xarxa
-
-### Configuració DNS Server (D-N03)
-
-#### Pas 1: Configuració de la interfície de xarxa
-
-Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la configuració de la interfície enp3s0 del servidor DNS amb IP estàtica 192.168.6.20/24, gateway 192.168.6.1 i servidors DNS externs (8.8.8.8 i 8.8.4.4).
-
-![Configuració Netplan DNS](./Photos/Sprint%201/DNS1.png)
-```bash
-sudo cat /etc/netplan/01-network-manager-all.yaml
-```
-```yaml
-# Let NetworkManager manage all devices on this system
-network:
-  version: 2
-  renderer: NetworkManager
-  ethernets:
-    enp3s0:
-      dhcp4: no
-      addresses:
-        - 192.168.6.20/24
-      routes:
-        - to: default
-          via: 192.168.6.1
-      nameservers:
-        addresses:
-          - 8.8.8.8
-          - 8.8.4.4
-```
-```bash
-sudo netplan apply
-```
+# Manual d'Usuari - Sistema de Consulta d'Equipaments de Barcelona
 
----
-
-#### Pas 2: Creació de l'usuari bchecker
-
-Creació de l'usuari `bchecker` amb el grup bchecker (1001) mitjançant la comanda `sudo adduser bchecker`. Es configura el directori personal i la contrasenya per complir amb els requisits del projecte.
-
-![Creació usuari bchecker](./Photos/Sprint%201/DNS2.png)
-```bash
-sudo adduser bchecker
-```
-
----
-
-#### Pas 3: Configuració del fitxer named.conf.options
-
-Visualització del fitxer `/etc/bind/named.conf.options` amb la configuració del servidor BIND9:
-- Directori de caché: `/var/cache/bind`
-- Permet consultes de qualsevol origen
-- Recursió habilitada
-- Escolta en el port 53
-- Forwarders configurats (8.8.8.8 i 8.8.4.4)
-- DNSSEC validation en mode auto
-
-![Configuració named.conf.options](./Photos/Sprint%201/DNS3.png)
-```bash
-sudo nano /etc/bind/named.conf.options
-```
-```conf
-options {
-    directory "/var/cache/bind";
-
-    allow-query { any; };
-    recursion yes;
-
-    listen-on port 53 { any; };
-    listen-on-v6 { any; };
-
-    forwarders {
-        8.8.8.8;
-        8.8.4.4;
-    };
-
-    dnssec-validation auto;
-    auth-nxdomain no;
-};
-```
-
----
-
-#### Pas 4: Configuració del fitxer named.conf.local
-
-Visualització del fitxer `/etc/bind/named.conf.local` amb la definició de les zones DNS:
-- **Zona directa "grup6.itb.cat":** Tipus master amb fitxer `/etc/bind/db.grup6.itb.cat`
-- **Zona inversa "60.168.192.in-addr.arpa":** Tipus master amb fitxer `/etc/bind/db.192.168.60`
-
-![Configuració named.conf.local](./Photos/Sprint%201/DNS4.png)
-```bash
-sudo nano /etc/bind/named.conf.local
-```
-```conf
-//
-// Do any local configuration here
-//
-
-// Consider adding the 1918 zones here, if they are not used in your
-// organization
-//include "/etc/bind/zones.rfc1918";
-
-zone "grup6.itb.cat" {
-    type master;
-    file "/etc/bind/db.grup6.itb.cat";
-};
-
-zone "60.168.192.in-addr.arpa" {
-    type master;
-    file "/etc/bind/db.192.168.60";
-};
-```
-
----
-
-#### Pas 5: Fitxer de zona directa db.grup6.itb.cat
-
-Contingut del fitxer `/etc/bind/db.grup6.itb.cat` amb els registres DNS:
-- **SOA:** DN-03.grup6.itb.cat amb admin.grup6.itb.cat
-- **NS:** Servidor de noms DN-03
-- **A:** Registre que apunta DN-03 a la IP 192.168.60.20
-
-![Zona directa grup6.itb.cat](./Photos/Sprint%201/DNS5.png)
-```bash
-sudo nano /etc/bind/db.grup6.itb.cat
-```
-```conf
-$TTL    604800
-@       IN      SOA     DN-03.grup6.itb.cat. admin.grup6.itb.cat. (
-                        2025101401 ; Serial
-                        604800     ; Refresh
-                        86400      ; Retry
-                        2419200    ; Expire
-                        604800 )   ; Negative Cache TTL
-;
-@       IN      NS      DN-03.grup6.itb.cat.
-DN-03   IN      A       192.168.60.20
-```
-
----
-
-#### Pas 6: Fitxer de zona inversa db.192.168.60
-
-Contingut del fitxer `/etc/bind/db.192.168.60` amb els registres de resolució inversa:
-- **SOA:** Configuració idèntica a la zona directa
-- **NS:** Servidor de noms DN-03
-- **PTR:** Registre que apunta 20 (192.168.60.20) a DN-03.grup6.itb.cat
-
-![Zona inversa 192.168.60](./Photos/Sprint%201/DNS6.png)
-```bash
-sudo nano /etc/bind/db.192.168.60
-```
-```conf
-$TTL    604800
-@       IN      SOA     DN-03.grup6.itb.cat. admin.grup6.itb.cat. (
-                        2025101401 ; Serial
-                        604800     ; Refresh
-                        86400      ; Retry
-                        2419200    ; Expire
-                        604800 )   ; Negative Cache TTL
-;
-@       IN      NS      DN-03.grup6.itb.cat.
-20      IN      PTR     DN-03.grup6.itb.cat.
-```
-
----
-
-#### Pas 7: Verificació del fitxer de zona inversa
-
-Comprovació addicional del contingut del fitxer `/etc/bind/db.192.168.60` confirmant la correcta configuració dels registres PTR per a la resolució inversa.
-
-![Verificació zona inversa](./Photos/Sprint%201/DNS7.png)
-```bash
-cat /etc/bind/db.192.168.60
-```
-
----
-
-#### Pas 8: Configuració del fitxer named.conf principal
-
-Visualització del fitxer `/etc/bind/named.conf` que inclou els fitxers de configuració principals:
-- `/etc/bind/named.conf.options`
-- `/etc/bind/named.conf.local`
-- `/etc/bind/named.conf.default-zones`
-
-Aquest és el fitxer principal que carrega tota la configuració del servidor BIND9.
-
-![Configuració named.conf](./Photos/Sprint%201/DNS8.png)
-```bash
-cat /etc/bind/named.conf
-```
-```conf
-// This is the primary configuration file for the BIND DNS server named.
-//
-// Please read /usr/share/doc/bind9/README.Debian.gz for information on the
-// structure of BIND configuration files in Debian, *BEFORE* you customize
-// this configuration file.
-//
-// If you are just adding zones, please do that in /etc/bind/named.conf.local
-
-include "/etc/bind/named.conf.options";
-include "/etc/bind/named.conf.local";
-include "/etc/bind/named.conf.default-zones";
-```
-
----
-
-#### Pas 9: Verificació de l'estat del servei BIND9
-
-Comprovació amb `sudo systemctl status bind9` que el servei named.service està actiu i funcionant correctament (active/running). Es pot veure que el servei va arrencar correctament i està escoltant en les interfícies IPv6 enp4s0 i enp5s0.
-
-![Estat servei BIND9](./Photos/Sprint%201/DNS9.png)
-```bash
-sudo systemctl status bind9
-```
-
-**Comandos addicionals:**
-```bash
-# Reiniciar el servei
-sudo systemctl restart bind9
-
-# Habilitar el servei a l'inici
-sudo systemctl enable bind9
-
-# Verificar la configuració
-sudo named-checkconf
-
-# Verificar zones
-sudo named-checkzone grup6.itb.cat /etc/bind/db.grup6.itb.cat
-sudo named-checkzone 60.168.192.in-addr.arpa /etc/bind/db.192.168.60
-```
-
----
-
-### Configuració DHCP Server
-
-#### Pas 1: Instal·lació del servei DHCP
-
-Instal·lació del paquet `isc-dhcp-server` al servidor Ubuntu.
-
-![Instal·lació DHCP](./Photos/Sprint%201/DHCP1.png)
-```bash
-sudo apt install isc-dhcp-server
-```
-
----
-
-#### Pas 2: Configuració del fitxer dhcpd.conf
-
-Configuració del fitxer `/etc/dhcp/dhcpd.conf` amb el rang d'IPs (192.168.60.30-100), gateway (192.168.60.1), DNS (8.8.8.8, 4.4.4.4) i reserva estàtica per adminPC (192.168.60.20).
-
-![Configuració dhcpd.conf](./Photos/Sprint%201/DHCP2.png)
-```bash
-sudo nano /etc/dhcp/dhcpd.conf
-```
-```conf
-subnet 192.168.60.0 netmask 255.255.255.0 {
-    range 192.168.60.30 192.168.60.100;
-    option routers 192.168.60.1;
-    option subnet-mask 255.255.255.0;
-    option domain-name-servers 8.8.8.8, 4.4.4.4;
-    option domain-name "D-N03";
-}
-
-host adminPC {
-    hardware ethernet 52:54:00:5a:73:f9;
-    fixed-address 192.168.60.20;
-}
-```
-
----
-
-#### Pas 3: Verificació de l'estat del servei
-
-Verificació que el servei DHCP està actiu i funcionant correctament (status active/running).
-
-![Estat servei DHCP](./Photos/Sprint%201/DHCP3.png)
-```bash
-sudo systemctl status isc-dhcp-server
-```
-
----
-
-#### Pas 4: Configuració client Ubuntu
-
-Configuració del client Ubuntu per obtenir IP automàticament via DHCP i DNS manual (192.168.60.20).
-
-![Configuració client Ubuntu](./Photos/Sprint%201/DHCP4.png)
-
-**Configuració a la interfície gràfica:**
-- Mètode IPv4: Automàtic (DHCP)
-- DNS: 192.168.60.20
-
----
-
-#### Pas 5: Verificació IP assignada - Client Ubuntu
-
-Verificació que el client Ubuntu ha rebut la IP 192.168.60.30 del pool DHCP.
-
-![IP client Ubuntu](./Photos/Sprint%201/DHCP5.png)
-```bash
-ip a | grep enp3s0
-```
-
----
-
-#### Pas 6: Verificació IP assignada - Client Windows
-
-Verificació que el client Windows ha rebut la IP 192.168.60.31 del servidor DHCP amb gateway 192.168.60.1.
-
-![IP client Windows](./Photos/Sprint%201/DHCP6.png)
-```cmd
-ipconfig
-```
-
----
-
-#### Pas 7: Comprovació del fitxer de leases
-
-Comprovació del fitxer de leases que mostra l'assignació d'IP al client Windows (DESKTOP-JNU2BQU amb IP dinàmica).
-
-![Fitxer leases DHCP](./Photos/Sprint%201/DHCP7.png)
-```bash
-sudo tail -f /var/lib/dhcp/dhcpd.leases
-```
-
----
-
-
-### Configuració Router R-N01
-
-#### Pas 1: Pantalla d'inici de sessió
-
-Pantalla d'inici de sessió del sistema Ubuntu Server amb els usuaris isardVDI, Grup6 i bchecker disponibles per accedir al router.
-
-![Pantalla inici Router](./Photos/Sprint%201/R1.png)
-
----
-
-#### Pas 2: Configuració del fitxer /etc/hosts
-
-Edició del fitxer `/etc/hosts` assignant el nom "R-N01" al localhost (127.0.1.1) per identificar correctament el router a la xarxa.
-
-![Configuració hosts](./Photos/Sprint%201/R2.png)
-```bash
-sudo nano /etc/hosts
-```
-```conf
-127.0.0.1       localhost
-127.0.1.1       R-N01
-
-# The following lines are desirable for IPv6 capable hosts
-::1     ip6-localhost ip6-loopback
-fe00::0 ip6-localnet
-ff00::0 ip6-mcastprefix
-ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters
-```
-
----
-
-#### Pas 3: Configuració de les interfícies de xarxa
-
-Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la configuració de les 3 interfícies del router:
-- **enp1s0:** NAT amb DHCP (52:54:00:34:64:69)
-- **enp2s0:** DMZ amb IP 192.168.6.1/24 (52:54:00:38:57:0d)
-- **enp3s0:** Intranet amb IP 192.168.60.1/24 (52:54:00:1d:14:5e)
-
-![Configuració Netplan](./Photos/Sprint%201/R3.png)
-```bash
-sudo cat /etc/netplan/01-network-manager-all.yaml
-```
-```yaml
-# Let NetworkManager manage all devices on this system
-network:
-  version: 2
-  renderer: NetworkManager
-  ethernets:
-    enp1s0:
-      match:
-        macaddress: 52:54:00:34:64:69
-      dhcp4: true
-      optional: true
-    enp2s0:
-      match:
-        macaddress: 52:54:00:38:57:0d
-      addresses:
-        - 192.168.6.1/24      # DMZ
-    enp3s0:
-      match:
-        macaddress: 52:54:00:1d:14:5e
-      addresses:
-        - 192.168.60.1/24     # Intranet
-```
-```bash
-sudo netplan apply
-```
-
----
-
-#### Pas 4: Verificació de les interfícies actives
-
-Comprovació amb `ip a` de l'estat de totes les interfícies de xarxa del router. Es poden veure les tres interfícies configurades i actives amb les seves respectives adreces IP i MAC.
-
-![Estat interfícies](./Photos/Sprint%201/R4.png)
-```bash
-ip a
-```
-
----
-
-#### Pas 5: Configuració de les regles d'iptables
-
-Configuració completa de les regles d'iptables per gestionar el tràfic entre les xarxes:
-- **NAT:** Configuració de MASQUERADE per sortida a Internet
-- **FORWARD:** Regles per permetre tràfic entre DMZ ↔ Internet i Intranet ↔ DMZ
-- **Port Forwarding:** Redirecció del port 3306 de DMZ a Intranet (192.168.6.10 → 192.168.60.20)
-
-Les regles es guarden amb `iptables-save` al fitxer `/etc/iptables/rules.v4`.
-
-![Regles iptables](./Photos/Sprint%201/R5.png)
-```bash
-# === POLÍTIQUES PER DEFECTE ===
-sudo iptables -P FORWARD DROP
-
-# === NAT ===
-sudo iptables -t nat -A POSTROUTING -o enp1s0 -j MASQUERADE
-
-# === INTERNET ⟷ DMZ ===
-sudo iptables -A FORWARD -i enp1s0 -o enp2s0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -A FORWARD -i enp2s0 -o enp1s0 -j ACCEPT
-
-# === INTRANET → DMZ ===
-sudo iptables -A FORWARD -i enp3s0 -o enp2s0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -j ACCEPT
-
-# === DMZ → INTRANET (NOMÉS WEB → BBDD) ===
-sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -s 192.168.6.10 -d 192.168.60.20 -p tcp --dport 3306 -j ACCEPT
-sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -j DROP
-
-# === INTRANET → DMZ (clients poden accedir) ===
-sudo iptables -A FORWARD -i enp3s0 -o enp2s0 -j ACCEPT
-
-# === GUARDAR CONFIGURACIÓ ===
-sudo iptables-save | sudo tee /etc/iptables/rules.v4
-```
-
----
-
-#### Pas 6: Verificació de les taules de rutes i iptables
-
-Comprovació amb `ip route show` de les rutes configurades i verificació amb `iptables -L -n -v` de totes les cadenes (INPUT, FORWARD, OUTPUT, PREROUTING, POSTROUTING) amb les regles actives i estadístiques de paquets processats.
-
-![Taules de rutes i verificació](./Photos/Sprint%201/R6.png)
-```bash
-# Mostrar rutes
-ip route show
-
-# Verificar regles iptables
-sudo iptables -L -n -v
-
-# Verificar regles NAT
-sudo iptables -t nat -L -n -v
-```
-
----
-
-#### Pas 7: Proves de connectivitat
+## Informació General
 
-Proves de ping des del router cap als servidors de la xarxa Intranet:
-- **192.168.60.20:** Servidor de Base de Dades (B-N03) - Connectivitat correcta
-- **192.168.60.30:** Client Ubuntu amb IP DHCP - Connectivitat correcta  
-- **192.168.60.31:** Client Windows amb IP DHCP - Connectivitat correcta
+**Versió del Sistema:** 1.0  
+**Data d'Actualització:** Novembre 2025  
+**Equip de Desenvolupament:** Grup 6 - ASIX C2  
 
-Totes les proves mostren 0% packet loss confirmant la correcta configuració del router.
-
-![Proves connectivitat](./Photos/Sprint%201/R7.png)
-```bash
-# DNS - Servidor de Base de Dades
-ping -c 4 192.168.60.20
-
-# Client Ubuntu (DHCP)
-ping -c 4 192.168.60.30
-
-# Client Windows (DHCP)
-ping -c 4 192.168.60.31
-```
-
-**Habilitar IP Forwarding permanent:**
-```bash
-sudo nano /etc/sysctl.conf
-```
-
-Descomentar la línea:
-```conf
-net.ipv4.ip_forward=1
-```
-
-Aplicar cambios:
-```bash
-sudo sysctl -p
-```
-
----
-
-
-
-## Sprint 2 - Configuració del Servidor Web
-
-### Configuració Web Server (W-N02)
-
-#### Pas 1: Configuració de la interfície de xarxa
-
-Visualització del fitxer `/etc/netplan/01-network-manager-all.yaml` amb la configuració de la interfície enp2s0 del servidor web amb IP estàtica 192.168.6.10/24, gateway 192.168.6.1 per a la xarxa DMZ.
-
-![Configuració Netplan Web Server](./Photos/sprint%202/web/1.png)
-```bash
-sudo cat /etc/netplan/01-network-manager-all.yaml
-```
-```yaml
-# Let NetworkManager manage all devices on this system
-network:
-  version: 2
-  renderer: NetworkManager
-  ethernets:
-    enp2s0:
-      dhcp4: no
-      addresses: [192.168.6.10/24]
-      routes:
-        - to: default
-          via: 192.168.6.1
-```
-```bash
-sudo netplan apply
-```
-
----
-
-#### Pas 2: Proves de connectivitat des del servidor web
-
-Proves de connectivitat mitjançant ping des del servidor web cap al servidor FTP (192.168.6.11) i cap al router (192.168.6.1). Ambdues proves mostren 0% packet loss confirmant la correcta configuració de xarxa a la DMZ.
-
-![Proves connectivitat Web Server](./Photos/sprint%202/web/2.png)
-```bash
-# Prova de connectivitat amb el servidor FTP
-echo "=== FTP ===" && ping 192.168.6.11
-
-# Prova de connectivitat amb el Router
-echo "=== Router ===" && ping 192.168.6.1
-```
-
----
-
-#### Pas 3: Configuració de regles iptables al router per al servidor web
-
-Configuració de les regles d'iptables al router R-N01 per permetre l'accés al servidor web. S'afegeixen regles INPUT per acceptar tràfic des de les xarxes DMZ (192.168.6.0/24) i Intranet (192.168.60.0/24), així com per a IPs específiques del web server (192.168.6.10 i 192.168.6.11).
-
-![Regles iptables per Web Server](./Photos/sprint%202/web/3.png)
-```bash
-# Al router R-N01
-sudo iptables -A INPUT -s 192.168.6.1 -j ACCEPT
-sudo iptables -A INPUT -s 192.168.6.10 -j ACCEPT
-sudo iptables -A INPUT -s 192.168.6.11 -j ACCEPT
-sudo iptables -A INPUT -j DROP
-```
-
 ---
 
-#### Pas 4: Instal·lació i verificació del servei Apache2
+## Introducció
 
-Instal·lació del servidor Apache2 i verificació que el servei està actiu (active/running) des del 10 de novembre. Es mostra l'estat del servei amb PID 2266 i el hostname del servidor 192.168.121.26 192.168.6.10.
+Aquest manual està dissenyat per ajudar-lo a utilitzar el sistema de consulta d'equipaments públics de Barcelona. El sistema permet accedir a informació detallada sobre centres educatius, culturals, esportius i altres equipaments públics de la ciutat.
 
-![Estat servei Apache2](./Photos/sprint%202/web/4.png)
-```bash
-sudo apt update
-sudo apt install apache2 -y
-```
-```bash
-sudo systemctl status apache2
-hostname -I
-```
-
----
-
-#### Pas 5: Configuració del firewall UFW i SSL
-
-Verificació de l'estat del servei Apache2, configuració del hostname, habilitació de la regla UFW per "Apache Full" (ports 80 i 443), i habilitació dels mòduls SSL necessaris (ssl, socache_shmcb). El servei està actiu i escoltant en múltiples ports incloent 80, 443 i [::]:22.
-
-![Configuració UFW i SSL](./Photos/sprint%202/web/5.png)
-```bash
-sudo systemctl status apache2
-hostname -I
-
-# Habilitar firewall per Apache
-sudo ufw allow 'Apache Full'
-
-# Habilitar UFW
-sudo ufw enable
-
-# Verificar estat del firewall
-sudo ufw status
-```
-```bash
-# Habilitar mòduls SSL
-sudo a2enmod ssl
-
-# Reiniciar Apache
-sudo systemctl restart apache2
-
-# Verificar ports escoltant
-sudo ss -ltn
-```
-
----
-
-#### Pas 6: Habilitació de mòduls SSL i configuració del lloc per defecte
-
-Execució de la comanda `sudo a2enmod ssl` per habilitar els mòduls SSL (setenvif, mime, socache_shmcb, ssl). Després s'habilita el lloc SSL per defecte amb `sudo a2ensite default-ssl.conf` i es recarrega Apache2. Es verifica la configuració amb `apache2ctl configtest` mostrant un warning sobre el ServerName.
-
-![Habilitació SSL i configuració](./Photos/sprint%202/web/6.png)
-```bash
-# Habilitar mòdul SSL
-sudo a2enmod ssl
-
-# Habilitar lloc per defecte SSL
-sudo a2ensite default-ssl.conf
-
-# Recarregar Apache2
-sudo systemctl reload apache2
-
-# Verificar configuració
-sudo apache2ctl configtest
-
-# Llistar fitxers de configuració SSL
-ls -la /etc/apache2/sites-available/default-ssl.conf
-```
-
 ---
-
-#### Pas 7: Accés HTTP al servidor web des del navegador
-
-Accés al servidor web mitjançant el navegador Firefox a l'adreça http://192.168.6.10 mostrant la pàgina per defecte d'Apache2 Ubuntu. Es visualitza la pàgina de benvinguda confirmant que el servidor web està operatiu i accessible des de la xarxa.
-
-![Accés HTTP al Web Server](./Photos/sprint%202/web/7.png)
-
-**Accedir des del navegador:**
-```
-http://192.168.6.10
-```
-
----
-
-#### Pas 8: Advertència de seguretat al accedir per HTTPS
 
-Intent d'accés al servidor web mitjançant HTTPS (https://192.168.6.10). Firefox detecta un risc de seguretat potencial perquè el certificat SSL és autosignat (self-signed). Es mostra l'error "MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT" amb opcions per retrocedir o acceptar el risc.
+## Requisits Mínims
 
-![Advertència certificat SSL](./Photos/sprint%202/web/8.png)
+### Equipament Necessari
 
-**Accedir des del navegador:**
-```
-https://192.168.6.10
-```
+- Ordinador amb connexió a Internet
+- Navegador web actualitzat (Chrome, Firefox, Safari o Edge)
+- Connexió de xarxa estable
 
----
-
-#### Pas 9: Accés HTTPS exitós després d'acceptar el certificat
-
-Després d'acceptar el risc de seguretat, s'accedeix correctament al servidor web per HTTPS (https://192.168.6.10) mostrant la mateixa pàgina per defecte d'Apache2 Ubuntu. Això confirma que el servidor està funcionant tant en HTTP com en HTTPS.
+### Coneixements Previs
 
-![Accés HTTPS al Web Server](./Photos/sprint%202/web/9.png)
+No es requereixen coneixements tècnics avançats. Aquest manual explicarà pas a pas com utilitzar el sistema.
 
 ---
-
-#### Pas 10: Configuració del servei SSH
-
-Verificació de l'estat del servei SSH amb `sudo systemctl status ssh` mostrant que està actiu des de les 17:02. Es configura el fitxer `/etc/ssh/sshd_config`, es reinicia el servei, i s'afegeix la regla UFW per permetre el port 2222/tcp. L'estat del firewall mostra les regles actives per Apache Full i SSH (port 2222).
-
-![Configuració servei SSH](./Photos/sprint%202/web/10.png)
-```bash
-# Verificar estat del servei SSH
-sudo systemctl status ssh
 
-# Editar configuració SSH
-sudo nano /etc/ssh/sshd_config
+## Accés al Sistema
 
-# Reiniciar servei SSH
-sudo systemctl restart ssh
+### Des de la Xarxa Interna (Oficina)
 
-# Permetre SSH al port 2222
-sudo ufw allow 2222/tcp
+Si es troba connectat a la xarxa interna de l'organització:
 
-# Habilitar UFW
-sudo ufw enable
+1. Obri el seu navegador web preferit
+2. A la barra d'adreces, escrigui: `http://192.168.6.10`
+3. Premi la tecla Enter
 
-# Verificar estat del firewall
-sudo ufw status
-```
+### Des de Casa o Ubicació Externa
 
----
+Si necessita accedir des de fora de l'oficina, contacti amb el departament de sistemes per obtenir les credencials d'accés remot.
 
-#### Pas 11: Configuració detallada del fitxer sshd_config
-
-Visualització del fitxer de configuració `/etc/ssh/sshd_config` amb nano mostrant els paràmetres principals: Port 2222, autenticació per clau pública habilitada (PubkeyAuthentication yes), login de root deshabilitat (PermitRootLogin no), i configuració de logging i autenticació.
-
-![Configuració sshd_config](./Photos/sprint%202/web/11.png)
-```bash
-sudo nano /etc/ssh/sshd_config
-```
-```conf
-# This is the sshd server system-wide configuration file.  See
-# sshd_config(5) for more information.
-
-Include /etc/ssh/sshd_config.d/*.conf
-
-Port 2222
-#AddressFamily any
-#ListenAddress 0.0.0.0
-#ListenAddress ::
-
-#HostKey /etc/ssh/ssh_host_rsa_key
-#HostKey /etc/ssh/ssh_host_ecdsa_key
-#HostKey /etc/ssh/ssh_host_ed25519_key
-
-# Ciphers and keying
-#RekeyLimit default none
-
-# Logging
-#SyslogFacility AUTH
-#LogLevel INFO
-
-# Authentication:
-#LoginGraceTime 2m
-PermitRootLogin no
-#StrictModes yes
-MaxAuthTries 3
-#MaxSessions 10
-
-PubkeyAuthentication yes
-```
-```bash
-# Reiniciar SSH després dels canvis
-sudo systemctl restart ssh
-```
-
 ---
-
-#### Pas 12: Configuració d'iptables al router per SSH
-
-Configuració de les regles d'iptables al router R-N01 per permetre l'accés SSH al servidor web. S'afegeixen regles INPUT per permetre: loopback, connexions establertes, ping (ICMP), SSH al router (port 22), accés des de les xarxes DMZ i Intranet, i accés a IPs específiques del web server. També s'afegeix una regla FORWARD bidireccional entre les xarxes DMZ i Intranet.
-
-![Regles iptables per SSH](./Photos/sprint%202/web/12.png)
-```bash
-# Al router R-N01
-
-# Permitir loopback
-sudo iptables -A INPUT -i lo -j ACCEPT
-
-# Permitir conexiones ya establecidas
-sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-# Permitir ping (ICMP)
-sudo iptables -A INPUT -p icmp -j ACCEPT
+## Pàgina Principal
 
-# Permitir SSH al router
-sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+### Descripció de la Interfície
 
-# Permitir acceso desde tus redes
-sudo iptables -A INPUT -s 192.168.6.0/24 -j ACCEPT
-sudo iptables -A INPUT -s 192.168.60.0/24 -j ACCEPT
+Quan accedeixi al sistema, veurà la pàgina principal amb els següents elements:
 
-# Permitir acceso desde IPs específicas
-sudo iptables -A INPUT -s 192.168.6.10 -j ACCEPT
-sudo iptables -A INPUT -s 192.168.6.11 -j ACCEPT
-sudo iptables -A INPUT -s 192.168.60.15 -j ACCEPT
+- **Capçalera**: Títol del sistema i logotip
+- **Menú de Navegació**: Opcions per cercar i filtrar equipaments
+- **Àrea de Resultats**: Llista d'equipaments disponibles
+- **Peu de Pàgina**: Informació de contacte i enllaços útils
 
-# Permitir tráfico entre 192.168.6.0/24 y 192.168.60.0/24 (BIDIRECCIONAL)
-sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -s 192.168.6.0/24 -d 192.168.60.0/24 -j ACCEPT
-sudo iptables -A FORWARD -i enp3s0 -o enp2s0 -s 192.168.60.0/24 -d 192.168.6.0/24 -j ACCEPT
-
-# Habilitar forwarding IPv4
-sudo sysctl -w net.ipv4.ip_forward=1
-```
-
 ---
-
-#### Pas 13: Configuració del forwarding IPv4 al router
 
-Edició del fitxer `/etc/sysctl.conf` al router amb nano per habilitar el forwarding de paquets IPv4. Es descomenta la línia `net.ipv4.ip_forward=1` per permetre que el router encamini paquets entre diferents interfícies de xarxa.
-
-![Configuració IP forwarding](./Photos/sprint%202/web/13.png)
-```bash
-# Al router R-N01
-sudo nano /etc/sysctl.conf
-```
-
-Descomentar la línia:
-```conf
-net.ipv4.ip_forward=1
-```
-```bash
-# Aplicar canvis
-sudo sysctl -p
-```
-
----
+## Cercar Equipaments
 
-#### Pas 14: Creació i habilitació del servei de persistència d'iptables
-
-Creació de l'script `/usr/local/bin/iptables-rules.sh` i del servei systemd `/etc/systemd/system/iptables-rules.service` per fer persistents les regles d'iptables. S'habilita i s'inicia el servei amb `systemctl enable/start iptables-rules.service`. La verificació mostra que el servei està actiu (active/exited) i s'ha carregat correctament.
-
-![Servei persistència iptables](./Photos/sprint%202/web/14.png)
-```bash
-# Crear script de regles iptables
-sudo nano /usr/local/bin/iptables-rules.sh
-```
-```bash
-#!/bin/bash
-# Script per carregar regles iptables
-
-# Aquí van les teves regles iptables
-iptables-restore < /etc/iptables/rules.v4
-```
-```bash
-# Fer executable l'script
-sudo chmod +x /usr/local/bin/iptables-rules.sh
-
-# Crear servei systemd
-sudo nano /etc/systemd/system/iptables-rules.service
-```
-```ini
-[Unit]
-Description=Configurar reglas de iptables para el router
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/iptables-rules.sh
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-```
-```bash
-# Recarregar systemd
-sudo systemctl daemon-reload
-
-# Habilitar servei
-sudo systemctl enable iptables-rules.service
-
-# Iniciar servei
-sudo systemctl start iptables-rules.service
-
-# Verificar estat
-sudo systemctl status iptables-rules.service
-
-# Verificar contingut del servei
-sudo cat /etc/systemd/system/iptables-rules.service
-```
+### Cerca Bàsica
 
----
+1. Localitzi el camp de cerca a la part superior de la pàgina
+2. Escrigui el nom o tipus d'equipament que cerca (per exemple: "biblioteca", "escola", "poliesportiu")
+3. Faci clic al botó "Cercar" o premi Enter
+4. Els resultats apareixeran a la llista inferior
 
-#### Pas 15: Creació del servei de ruta estàtica al router (Servidor Web)
-
-Visualització del fitxer `/etc/systemd/system/add-static-route.service` al servidor web (W-NCC) que configura una ruta estàtica cap a la xarxa Intranet (192.168.60.0/24) via el router (192.168.6.1). Aquest servei s'executa després de la xarxa estar disponible.
-
-![Servei ruta estàtica Web Server](./Photos/sprint%202/web/15.png)
-```bash
-# Al servidor Web (W-NCC)
-sudo cat /etc/systemd/system/add-static-route.service
-```
-```ini
-[Unit]
-Description=Agregar ruta estática al iniciar
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/sbin/ip route replace 192.168.60.0/24 via 192.168.6.1
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-```
+### Filtres Disponibles
 
----
+El sistema ofereix diferents filtres per refinar la seva cerca:
 
-#### Pas 16: Verificació del servei de ruta estàtica
-
-Comprovació del contingut del fitxer `/etc/systemd/system/add-static-route.service` al servidor de base de dades (B-N06) amb una configuració similar, establint la ruta estàtica cap a la xarxa DMZ (192.168.6.0/24) via el router de la Intranet (192.168.60.1).
-
-![Verificació ruta estàtica Database](./Photos/sprint%202/web/16.png)
-```bash
-# Al servidor de Base de Dades (B-N06)
-cat /etc/systemd/system/add-static-route.service
-```
-```ini
-[Unit]
-Description=Agregar ruta estática al iniciar
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/sbin/ip route replace 192.168.6.0/24 via 192.168.60.1
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-```
+**Per Tipus d'Equipament:**
+- Centres educatius
+- Biblioteques
+- Centres culturals
+- Instal·lacions esportives
+- Centres cívics
+- Altres equipaments
 
----
+**Per Ubicació:**
+- Seleccioni el districte de Barcelona
+- Seleccioni el barri específic
 
-#### Pas 17: Connexió SSH des del servidor FTP al Web Server
+**Per Serveis:**
+- Accessibilitat
+- Horari ampliat
+- Connexió WiFi
+- Altres serveis disponibles
 
-Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el port 2222 amb la comanda `ssh -p 2222 bchecker@192.168.6.10`. S'accedeix correctament al sistema Ubuntu 22.04.4 LTS mostrant informació de documentació, management i suport. El darrer login va ser des de 192.168.6.11.
+### Com Aplicar Filtres
 
-![Connexió SSH FTP a Web](./Photos/sprint%202/web/17.png)
-```bash
-# Des del servidor FTP (F-NCC)
-ssh -p 2222 bchecker@192.168.6.10
-```
+1. Faci clic a la secció "Filtres" al lateral de la pàgina
+2. Marqui les caselles dels filtres que desitgi aplicar
+3. El sistema actualitzarà automàticament els resultats
+4. Per eliminar filtres, desmarqui les caselles corresponents
 
 ---
 
-#### Pas 18: Instal·lació de PHP i mòduls necessaris
+## Visualitzar Informació Detallada
 
-Instal·lació de PHP 8.1 i tots els mòduls necessaris per a l'aplicació web, incloent php-mysql, php-curl, php-json, php-xml, php-mbstring, php-gd, etc.
+### Consultar Fitxa d'Equipament
 
-![Instal·lació PHP](./Photos/sprint%202/web/18.png)
-```bash
-sudo apt install php libapache2-mod-php php-mysql php-cli php-curl php-gd php-json php-mbstring php-xml php-gd -y
-```
-
----
-
-#### Pas 19: Configuració del DirectoryIndex per PHP
-
-Edició del fitxer `/etc/apache2/mods-enabled/dir.conf` amb nano per configurar l'ordre del DirectoryIndex. S'estableix que index.php tingui prioritat sobre els altres fitxers d'índex (index.html, index.cgi, etc.).
-
-![Configuració DirectoryIndex](./Photos/sprint%202/web/19.png)
-```bash
-sudo nano /etc/apache2/mods-enabled/dir.conf
-```
-```xml
-<IfModule mod_dir.c>
-    DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
-</IfModule>
-
-# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
-```
-```bash
-# Reiniciar Apache
-sudo systemctl restart apache2
-```
----
+Per veure informació completa d'un equipament:
 
-#### Pas 20: Verificació de la instal·lació de PHP i mòduls
+1. Faci clic sobre el nom de l'equipament a la llista de resultats
+2. S'obrirà una finestra amb la informació detallada
 
-Comprovació de la versió de PHP instal·lada mostrant PHP 8.1.2-1ubuntu2.22 amb Zend Engine v4.1.2 i Zend OPcache v8.1.2. S'executa la comanda `php -m | grep -E 'mysqli|pdo'` per verificar que els mòduls mysqli i pdo_mysql estan instal·lats correctament.
+### Informació Disponible
 
-![Verificació PHP i mòduls](./Photos/sprint%202/web/20.png)
-```bash
-# Verificar versió de PHP
-php -v
+Cada equipament mostra la següent informació:
 
-# Verificar mòduls mysqli i pdo
-php -m | grep -E 'mysqli|pdo'
-```
-```bash
-# Editar configuració DirectoryIndex
-sudo nano /etc/apache2/mods-enabled/dir.conf
-```
+**Dades Bàsiques:**
+- Nom de l'equipament
+- Tipus d'equipament
+- Institució responsable
 
----
+**Ubicació:**
+- Adreça completa
+- Barri i districte
+- Codi postal
+- Coordenades geogràfiques
 
-#### Pas 21: Creació de l'arxiu test.php i configuració de permisos
-
-Creació de l'arxiu `/var/www/html/test.php` amb la funció `phpinfo();` per mostrar la informació de configuració de PHP. Es configuren els permisos adequats amb `chown www-data:www-data` i `chmod 644`. Es verifica el contingut del fitxer mostrant el codi PHP bàsic.
-
-![Creació test.php](./Photos/sprint%202/web/21.png)
-```bash
-# Crear fitxer test.php
-sudo nano /var/www/html/test.php
-```
-```php
-<?php
-phpinfo();
-?>
-```
-```bash
-# Configurar propietari i permisos
-sudo chown www-data:www-data /var/www/html/test.php
-sudo chmod 644 /var/www/html/test.php
-
-# Verificar contingut
-cat /var/www/html/test.php
-```
-
-**Accedir des del navegador:**
-```
-http://192.168.6.10/test.php
-```
+**Horaris:**
+- Dies d'obertura
+- Horari d'atenció al públic
+- Períodes de tancament
 
----
+**Serveis:**
+- Llista de serveis disponibles
+- Característiques especials
+- Accessibilitat
 
-#### Pas 22: Accés web a test.php i verificació completa de PHP
-
-Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgina d'informació de PHP (phpinfo). Es visualitza la versió PHP 8.1.2-1ubuntu2.22 amb informació detallada del sistema, build date, server API, directives de configuració, PHP Extension, Zend Extension i altres paràmetres tècnics del servidor PHP. Aquesta pàgina confirma que PHP està correctament integrat amb Apache2 i que tots els mòduls necessaris estan carregats.
-
-![Visualització phpinfo()](./Photos/sprint%202/web/22.png)
-
-**Informació mostrada al phpinfo():**
-- **PHP Version:** 8.1.2-1ubuntu2.22
-- **System:** Linux
-- **Build Date:** Apr 4 14:35
-- **Server API:** Apache 2.0 Handler
-- **PHP API:** 20210902
-- **PHP Extension:** 20210902
-- **Zend Extension:** 420210902
-- **Debug Build:** no
-- **Thread Safety:** disabled
-- **Zend Signal Handling:** enabled
-- **Zend Memory Manager:** enabled
-- **IPv6 Support:** enabled
-
-**Mòduls verificats:**
-- mysqli 
-- pdo_mysql 
-- json 
-- mbstring 
-- xml 
-- curl 
-- gd 
-```bash
-# Opcio opcional: Eliminar test.php després de verificar
-# sudo rm /var/www/html/test.php
-```
+**Contacte:**
+- Telèfon
+- Correu electrònic
+- Pàgina web (si està disponible)
 
 ---
-
 
-### Configuració Database Server (B-N03)
+## Imprimir o Guardar Informació
 
-#### Pas 1: Instal·lació del servidor MySQL
+### Imprimir Fitxa d'Equipament
 
-Instal·lació del paquet `mysql-server` amb la comanda `sudo apt install mysql-server`. El sistema descarrega i instal·la automàticament tots els paquets necessaris incloent llibreries perl, llibcgi, libevent, mecab i les dependències de MySQL 8.0.
+1. Obri la fitxa de l'equipament que desitja imprimir
+2. Faci clic al botó "Imprimir" a la part superior dreta
+3. Configuri les opcions d'impressió al quadre de diàleg
+4. Faci clic a "Imprimir"
 
-![Instal·lació MySQL Server](./Photos/sprint%202/BBDD/BBDD1.png)
-```bash
-sudo apt install mysql-server
-```
+### Exportar Resultats
 
----
-
-#### Pas 2: Creació de la taula equipaments
-
-En aquest projecte s'ha optat per definir alguns identificadors (com register_id i institution_id) com a VARCHAR en lloc d'INTEGER, ja que els valors que provenen de les fonts originals són molt grans o no segueixen un format numèric estrictament. Emprar VARCHAR evita problemes de desbordament d'enter (overflow) i garanteix que es puguin emmagatzemar codis mixtos o identifiers que puguin incloure zeros a l'esquerra o formats no numèrics.
-
-![Taula equipaments](./Photos/sprint%202/BBDD/BBDD2.png)
-```sql
-CREATE TABLE equipaments (
-    register_id VARCHAR(50),
-    nom VARCHAR(255) NOT NULL,
-    institution_id VARCHAR(50),
-    institution_name VARCHAR(255),
-    created TIMESTAMP,
-    modified TIMESTAMP,
-    geo_x FLOAT,
-    geo_y FLOAT,
-    latitude FLOAT,
-    longitude FLOAT,
-    estimated_dates VARCHAR(100),
-    start_date DATE,
-    end_date DATE,
-    timetable TEXT
-);
-```
-
----
+Per guardar una llista de resultats:
 
-#### Pas 3: Creació de la taula direccions
-
-Script SQL per crear la taula `direccions` amb clau forana (FOREIGN KEY) referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), roadtype_id, roadtype_name, road_id, road_name (VARCHAR 255), start_street_number i end_street_number (VARCHAR 10), neighborhood_id, neighborhood_name, district_id, district_name (VARCHAR 100), zip_code (VARCHAR 10), town (VARCHAR 100), main_address i address_type (VARCHAR 50).
-
-![Taula direccions](./Photos/sprint%202/BBDD/BBDD3.png)
-```sql
-CREATE TABLE direccions (
-    equipament_id VARCHAR(50),           -- Referencia a equipaments
-    roadtype_id VARCHAR(50),
-    roadtype_name VARCHAR(100),
-    road_id VARCHAR(50),
-    road_name VARCHAR(255),
-    start_street_number VARCHAR(10),
-    end_street_number VARCHAR(10),
-    neighborhood_id VARCHAR(50),
-    neighborhood_name VARCHAR(100),
-    district_id VARCHAR(50),
-    district_name VARCHAR(100),
-    zip_code VARCHAR(10),
-    town VARCHAR(100),
-    main_address VARCHAR(50),
-    address_type VARCHAR(50),
-    FOREIGN KEY (equipament_id) REFERENCES equipaments(register_id)
-);
-```
+1. Després de realitzar la cerca, faci clic a "Exportar"
+2. Seleccioni el format desitjat (PDF, Excel o CSV)
+3. El fitxer es descarregarà automàticament al seu ordinador
 
 ---
 
-#### Pas 4: Creació de la taula valors
-
-Script SQL per crear la taula `valors` amb clau forana referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), attribute_id (VARCHAR 50), values_id (VARCHAR 50), category (VARCHAR 100), attribute_name (VARCHAR 100), value (VARCHAR 255), outstanding (VARCHAR 50), i description (TEXT).
-
-![Taula valors](./Photos/sprint%202/BBDD/BBDD4.png)
-```sql
-CREATE TABLE valors (
-    equipament_id VARCHAR(50),
-    attribute_id VARCHAR(50),
-    values_id VARCHAR(50),
-    category VARCHAR(100),
-    attribute_name VARCHAR(100),
-    value VARCHAR(255),
-    outstanding VARCHAR(50),
-    description TEXT,
-    FOREIGN KEY (equipament_id) REFERENCES equipaments(register_id)
-);
-```
+## Preguntes Freqüents
 
----
+### La informació està actualitzada?
 
-#### Pas 5: Creació de la taula filtres_secundaris
-
-Script SQL per crear la taula `filtres_secundaris` amb clau forana referenciada a equipaments. Inclou camps: equipment_id (VARCHAR 50), filter_id (VARCHAR 50), filter_name (VARCHAR 255), filter_fullpath (TEXT), filter_tree (VARCHAR 255), i filter_asia_id (VARCHAR 50).
-
-![Taula filtres_secundaris](./Photos/sprint%202/BBDD/BBDD5.png)
-```sql
-CREATE TABLE filtres_secundaris (
-    equipament_id VARCHAR(50),
-    filter_id VARCHAR(50),
-    filter_name VARCHAR(255),
-    filter_fullpath TEXT,
-    filter_tree VARCHAR(255),
-    filter_asia_id VARCHAR(50),
-    FOREIGN KEY (equipament_id) REFERENCES equipaments(register_id)
-);
-```
+Sí, la base de dades s'actualitza periòdicament amb la informació oficial de l'Ajuntament de Barcelona.
 
----
+### Puc accedir al sistema des del meu telèfon mòbil?
 
-#### Pas 6: Verificació de les taules creades
+Sí, el sistema és compatible amb dispositius mòbils. Utilitzi el mateix navegador del seu telèfon i accedeixi a l'adreça indicada.
 
-Execució de la comanda `SHOW TABLES;` a MySQL mostrant les 4 taules creades correctament a la base de dades EquipamentsBCN: direccions, equipaments, filtres_secundaris i valors. El resultat mostra "4 rows in set (0,01 sec)".
+### Què faig si no trobo l'equipament que cerco?
 
-![Verificació taules MySQL](./Photos/sprint%202/BBDD/BBDD6.png)
-```sql
-SHOW TABLES;
-```
+Verifiqui que ha escrit correctament el nom o proveu amb paraules clau alternatives. Si continua sense trobar-lo, contacti amb el servei d'atenció.
 
----
+### Puc suggerir millores al sistema?
 
-#### Pas 7: Visualització de l'estructura de la taula equipaments
+Sí, enviï els seus comentaris i suggeriments a través del formulari de contacte disponible al peu de pàgina.
 
-Execució de la comanda `SHOW COLUMNS FROM equipaments;` mostrant l'estructura completa de la taula amb 14 camps: register_id (PRI, varchar 50), nom (varchar 255), institution_id, institution_name, created i modified (timestamp), geo_x, geo_y, latitude i longitude (float), estimated_dates (varchar 100), start_date i end_date (date), i timetable (text).
+### Qui té accés a aquest sistema?
 
-![Columnes taula equipaments](./Photos/sprint%202/BBDD/BBDD7.png)
-```sql
-SHOW COLUMNS FROM equipaments;
-```
+El sistema està disponible per a tots els empleats de l'organització amb connexió a la xarxa interna.
 
 ---
 
-#### Pas 8: Visualització de l'estructura de la taula direccions
-
-Execució de la comanda `SHOW COLUMNS FROM direccions;` mostrant l'estructura completa amb 15 camps. Equipment_id està configurat com a MUL (clau múltiple/forana) referenciant la taula equipaments. Tots els camps són VARCHAR excepte address_type, amb mides que varien entre VARCHAR(10) i VARCHAR(255).
-
-![Columnes taula direccions](./Photos/sprint%202/BBDD/BBDD8.png)
-```sql
-SHOW COLUMNS FROM direccions;
-```
-
----
+## Resolució de Problemes Comuns
 
-#### Pas 9: Visualització de l'estructura de la taula valors
+### No puc accedir a la pàgina
 
-Execució de la comanda `SHOW COLUMNS FROM valors;` mostrant l'estructura amb 8 camps. Equipment_id està configurat com a MUL (clau forana). Els camps inclouen: equipment_id, attribute_id, values_id (VARCHAR 50), category i attribute_name (VARCHAR 100), value (VARCHAR 255), outstanding (VARCHAR 50) i description (TEXT).
+**Possibles solucions:**
 
-![Columnes taula valors](./Photos/sprint%202/BBDD/BBDD9.png)
-```sql
-SHOW COLUMNS FROM valors;
-```
+1. Verifiqui que està connectat a la xarxa
+2. Comprovi que ha escrit correctament l'adreça
+3. Provi amb un navegador diferent
+4. Netegi la memòria cau del navegador
+5. Contacti amb el servei d'assistència tècnica
 
----
+### La pàgina carrega lentament
 
-#### Pas 10: Visualització de l'estructura de la taula filtres_secundaris
+**Possibles solucions:**
 
-Execució de la comanda `SHOW COLUMNS FROM filtres_secundaris;` mostrant l'estructura amb 6 camps. Equipment_id està configurat com a MUL (clau forana). Els camps inclouen: equipment_id, filter_id (VARCHAR 50), filter_name (VARCHAR 255), filter_fullpath (TEXT), filter_tree (VARCHAR 255) i filter_asia_id (VARCHAR 50).
+1. Comprovi la velocitat de la seva connexió a Internet
+2. Tanqui pestanyes o aplicacions que no utilitzi
+3. Reiniciï el navegador
+4. Si el problema persisteix, informi al departament tècnic
 
-![Columnes taula filtres_secundaris](./Photos/sprint%202/BBDD/BBDD10.png)
-```sql
-SHOW COLUMNS FROM filtres_secundaris;
-```
+### Els resultats de cerca no són correctes
 
----
+**Possibles solucions:**
 
-### Configuració FTP Server (F-N02)
+1. Revisi els filtres aplicats
+2. Utilitzi paraules clau més generals
+3. Elimini tots els filtres i torni a cercar
+4. Actualitzi la pàgina amb F5
 
-#### Pas 1: Instal·lació del servidor vsftpd
+### No es mostra tota la informació
 
-Instal·lació del paquet `vsftpd` (Very Secure FTP Daemon) amb la comanda `sudo apt install vsftpd`. El sistema descarrega i instal·la el paquet vsftpd versió 3.0.5-0ubuntu1.1 amb una mida de 123 kB. Es crea automàticament el servei systemd i s'instal·len les dependències necessàries.
+**Possibles solucions:**
 
-![Instal·lació vsftpd](./Photos/sprint%202/ftp/ftp1.png)
-```bash
-sudo apt install vsftpd
-```
+1. Faci scroll cap avall per veure més contingut
+2. Maximitzeu la finestra del navegador
+3. Ajusteu el nivell de zoom del navegador (Ctrl + / Ctrl -)
+4. Verifiqui que el seu navegador està actualitzat
 
 ---
 
-#### Pas 2: Verificació de la versió de vsftpd
+## Consells d'Ús
 
-Comprovació de la versió instal·lada de vsftpd amb la comanda `vsftpd -v`. El sistema confirma que s'ha instal·lat la versió 3.0.5 del servidor FTP.
+### Optimitzar les Cerques
 
-![Versió vsftpd](./Photos/sprint%202/ftp/ftp2.png)
-```bash
-vsftpd -v
-```
+- Utilitzi paraules clau específiques
+- Combini diferents filtres per resultats més precisos
+- Guardi els equipaments que consulti freqüentment
+- Utilitzi cometes per cercar frases exactes
 
----
+### Mantenir la Seguretat
 
-#### Pas 3: Habilitació del servei vsftpd
+- No compartiu les credencials d'accés
+- Tanqueu la sessió quan acabeu de treballar
+- No deixeu l'ordinador desatès amb la sessió oberta
+- Informi immediatament de qualsevol activitat sospitosa
 
-Habilitació del servei vsftpd per iniciar-se automàticament amb l'arrencada del sistema mitjançant la comanda `sudo systemctl enable vsftpd`. Això crea els enllaços simbòlics necessaris per al servei.
+### Bones Pràctiques
 
-![Habilitació servei vsftpd](./Photos/sprint%202/ftp/ftp3.png)
-```bash
-sudo systemctl enable vsftpd
-```
+- Actualitzeu el navegador regularment
+- Utilitzeu una connexió segura
+- Verifiqueu la informació important abans d'utilitzar-la
+- Reporteu errors o inconsistències a la informació
 
 ---
 
-#### Pas 4: Inici i verificació de l'estat del servei vsftpd
+## Contacte i Assistència
 
-Execució de les comandes `sudo systemctl start vsftpd` i `sudo systemctl status vsftpd` per iniciar i verificar l'estat del servei. El servei està actiu (active/running) des del 10 de novembre a les 16:07, amb PID 2329, consumint 868.0K de memòria i llegint la configuració del fitxer `/etc/vsftpd.conf`.
+### Servei d'Assistència Tècnica
 
-![Estat servei vsftpd](./Photos/sprint%202/ftp/ftp4.png)
-```bash
-sudo systemctl start vsftpd
-sudo systemctl status vsftpd
-```
+Per a problemes tècnics o consultes sobre el sistema:
 
----
-
-#### Pas 5: Accés al fitxer de configuració vsftpd.conf
+**Horari d'atenció:**
+- Dilluns a Divendres: 9:00 - 18:00
+- Cap de setmana i festius: Tancat
 
-Edició del fitxer de configuració principal `/etc/vsftpd.conf` amb nano per configurar els paràmetres del servidor FTP.
+**Canals de contacte:**
+- Telèfon intern: Extensió 1234
+- Correu electrònic: suport.sistemes@organitzacio.cat
+- Portal d'incidències: http://suport.intern
 
-![Edició vsftpd.conf](./Photos/sprint%202/ftp/ftp5.png)
-```bash
-sudo nano /etc/vsftpd.conf
-```
+### Temps de Resposta
 
----
+- Incidències crítiques: 2 hores
+- Incidències normals: 24 hores
+- Consultes generals: 48 hores
 
-#### Pas 6: Habilitació d'usuaris locals
+### Informació a Proporcionar
 
-Configuració del paràmetre `local_enable=YES` al fitxer vsftpd.conf per permetre que els usuaris locals del sistema puguin iniciar sessió al servidor FTP.
+Quan contacti amb l'assistència tècnica, proporcioni:
 
-![Habilitació usuaris locals](./Photos/sprint%202/ftp/ftp6.png)
-```conf
-# Uncomment this to allow local users to log in.
-local_enable=YES
-```
+1. Nom complet i departament
+2. Descripció detallada del problema
+3. Missatges d'error (si n'hi ha)
+4. Navegador i sistema operatiu utilitzat
+5. Captures de pantalla (si és possible)
 
 ---
 
-#### Pas 7: Deshabilitació de l'accés anònim
+## Glossari de Termes
 
-Configuració del paràmetre `anonymous_enable=NO` al fitxer vsftpd.conf per deshabilitar l'accés anònim al servidor FTP, millorant així la seguretat del sistema.
+**Cercador**: Eina que permet trobar informació específica al sistema.
 
-![Deshabilitació accés anònim](./Photos/sprint%202/ftp/ftp7.png)
-```conf
-# Allow anonymous FTP? (Disabled by default)
-anonymous_enable=NO
-```
+**Filtre**: Criteri que permet refinar els resultats de cerca.
 
----
+**Equipament**: Edifici o instal·lació pública de la ciutat de Barcelona.
 
-#### Pas 8: Habilitació d'escriptura FTP
+**Districte**: Divisió administrativa de la ciutat de Barcelona.
 
-Configuració del paràmetre `write_enable=YES` al fitxer vsftpd.conf per permetre qualsevol forma de comandes d'escriptura FTP, incloent pujada, eliminació i modificació d'arxius.
+**Barri**: Subdivisió d'un districte de Barcelona.
 
-![Habilitació escriptura FTP](./Photos/sprint%202/ftp/ftp8.png)
-```conf
-# Uncomment this to enable any form of FTP write command.
-write_enable=YES
-```
+**Exportar**: Acció de guardar informació en un fitxer extern.
 
----
+**Navegador**: Programa utilitzat per accedir a pàgines web (Chrome, Firefox, etc.).
 
-#### Pas 9: Restricció d'usuaris al directori personal
+**URL**: Adreça web que s'escriu a la barra del navegador.
 
-Configuració del paràmetre `chroot_local_user=YES` al fitxer vsftpd.conf per restringir els usuaris locals als seus directoris personals (chroot jail), impedint que naveguin per altres parts del sistema de fitxers per motius de seguretat.
+**Sessió**: Període de temps durant el qual un usuari està connectat al sistema.
 
-![Restricció chroot](./Photos/sprint%202/ftp/ftp9.png)
-```conf
-# You may restrict local users to their home directories. See the FAQ for
-# the possible risks in this before using chroot_local_user or
-# chroot_list_enable below.
-chroot_local_user=YES
-```
+**Interfície**: Conjunt d'elements visuals que permeten interactuar amb el sistema.
 
 ---
 
-#### Pas 10: Reinici i verificació del servei vsftpd
+## Annexos
 
-Reinici del servei vsftpd amb `sudo systemctl restart vsftpd` per aplicar els canvis de configuració. La verificació amb `sudo systemctl status vsftpd` confirma que el servei està actiu (active/running) des de les 16:13:16 amb PID 2787.
+### Annex A: Llista de Navegadors Compatible
 
-![Reinici servei vsftpd](./Photos/sprint%202/ftp/ftp10.png)
-```bash
-sudo systemctl restart vsftpd
-sudo systemctl status vsftpd
-```
+El sistema funciona correctament amb les versions actualitzades de:
 
----
+- Google Chrome (versió 90 o superior)
+- Mozilla Firefox (versió 88 o superior)
+- Microsoft Edge (versió 90 o superior)
+- Safari (versió 14 o superior)
 
-#### Pas 11: Creació de l'usuari FTP usuarigroup6
+### Annex B: Codis d'Error Comuns
 
-Creació de l'usuari `usuarigroup6` amb la comanda `sudo adduser usuarigroup6`. El sistema crea l'usuari amb UID 1002, el grup usuarigroup6 (GID 1002), el directori personal `/home/usuarigroup6`, i es configura la contrasenya i la informació del usuari.
+**Error 404 - Pàgina no trobada**
+- Causa: L'adreça escrita no és correcta
+- Solució: Verifiqui l'URL i torni a intentar-ho
 
-![Creació usuari FTP](./Photos/sprint%202/ftp/ftp11.png)
-```bash
-sudo adduser usuarigroup6
-```
+**Error 500 - Error del servidor**
+- Causa: Problema tècnic al servidor
+- Solució: Esperi uns minuts i torni a intentar-ho. Si persisteix, contacti amb suport
 
----
+**Error de connexió**
+- Causa: No hi ha connexió a la xarxa
+- Solució: Verifiqui la seva connexió a Internet
 
-#### Pas 12: Configuració del directori FTP i permisos
+### Annex C: Dreceres de Teclat
 
-Creació del directori `/home/usuarigroup6/ftp` amb `sudo mkdir -p`, assignació de propietat a nobody:nogroup amb `sudo chown nobody:nogroup`, i configuració dels permisos a+w amb `sudo chmod a+w` per permetre l'escriptura a tots els usuaris.
+Per facilitar la navegació:
 
-![Configuració directori FTP](./Photos/sprint%202/ftp/ftp12.png)
-```bash
-sudo mkdir -p /home/usuarigroup6/ftp
-sudo chown nobody:nogroup /home/usuarigroup6/ftp
-sudo chmod a+w /home/usuarigroup6/ftp
-```
+- **Ctrl + F**: Cercar text a la pàgina
+- **Ctrl + P**: Imprimir pàgina
+- **F5**: Actualitzar pàgina
+- **Ctrl + (+)**: Augmentar zoom
+- **Ctrl + (-)**: Reduir zoom
+- **Ctrl + 0**: Restablir zoom
 
 ---
 
-#### Pas 13: Configuració del firewall per FTP
-
-Habilitació del port 22/tcp al firewall UFW amb la comanda `sudo ufw allow 22/tcp` per permetre les connexions SSH (nota: per FTP passiu caldria obrir també el port 21 i el rang de ports passius).
-
-![Configuració firewall FTP](./Photos/sprint%202/ftp/ftp13.png)
-```bash
-sudo ufw allow 22/tcp
-```
-
----
+## Notes Finals
 
-#### Pas 14: Prova de connexió SSH des del servidor FTP
+Aquest manual està subjecte a actualitzacions periòdiques. Consulteu la versió més recent al portal intern de documentació.
 
-Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el port 2222 amb la comanda `ssh -p 2222 bchecker@192.168.6.10`. S'accedeix correctament al sistema Ubuntu 22.04.4 LTS mostrant la informació de benvinguda. El darrer login va ser el 10 de novembre a les 17:32:01 des de 192.168.6.11.
+Per a qualsevol dubte o suggeriment sobre aquest manual, contacti amb el departament de sistemes.
 
-![Connexió SSH des de FTP](./Photos/sprint%202/ftp/ftp14.png)
-```bash
-ssh -p 2222 bchecker@192.168.6.10
-```
+**Última revisió:** Novembre 2025  
+**Versió del document:** 1.0  
+**Propera revisió prevista:** Març 2026
 
 ---
