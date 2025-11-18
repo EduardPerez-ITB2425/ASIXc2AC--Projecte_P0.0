@@ -1443,7 +1443,7 @@ sudo apt install mysql-server
 
 #### Pas 2: Creació de la taula equipaments
 
-Script SQL per crear la taula `equipaments` amb els camps: register_id (VARCHAR 50), nom (VARCHAR 255 NOT NULL), institution_id (VARCHAR 50), institution_name (VARCHAR 255), created i modified (TIMESTAMP), geo_x i geo_y (FLOAT), latitude i longitude (FLOAT), estimated_dates (VARCHAR 100), start_date i end_date (DATE), i timetable (TEXT).
+En aquest projecte s’ha optat per definir alguns identificadors (com register_id i institution_id) com a VARCHAR en lloc d’INTEGER, ja que els valors que provenen de les fonts originals són molt grans o no segueixen un format numèric estrictament. Emprar VARCHAR evita problemes de desbordament d’enter (overflow) i garanteix que es puguin emmagatzemar codis mixtos o identifiers que puguin incloure zeros a l’esquerra o formats no numèrics.
 
 ![Taula equipaments](./Photos/sprint%202/BBDD/BBDD2.png)
 ```sql
@@ -1597,6 +1597,9 @@ SHOW COLUMNS FROM filtres_secundaris;
 Instal·lació del paquet `vsftpd` (Very Secure FTP Daemon) amb la comanda `sudo apt install vsftpd`. El sistema descarrega i instal·la el paquet vsftpd versió 3.0.5-0ubuntu1.1 amb una mida de 123 kB. Es crea automàticament el servei systemd i s'instal·len les dependències necessàries.
 
 ![Instal·lació vsftpd](./Photos/sprint%202/ftp/ftp1.png)
+```bash
+sudo apt install vsftpd
+```
 
 ---
 
@@ -1605,6 +1608,9 @@ Instal·lació del paquet `vsftpd` (Very Secure FTP Daemon) amb la comanda `sudo
 Comprovació de la versió instal·lada de vsftpd amb la comanda `vsftpd -v`. El sistema confirma que s'ha instal·lat la versió 3.0.5 del servidor FTP.
 
 ![Versió vsftpd](./Photos/sprint%202/ftp/ftp2.png)
+```bash
+vsftpd -v
+```
 
 ---
 
@@ -1613,6 +1619,9 @@ Comprovació de la versió instal·lada de vsftpd amb la comanda `vsftpd -v`. El
 Habilitació del servei vsftpd per iniciar-se automàticament amb l'arrencada del sistema mitjançant la comanda `sudo systemctl enable vsftpd`. Això crea els enllaços simbòlics necessaris per al servei.
 
 ![Habilitació servei vsftpd](./Photos/sprint%202/ftp/ftp3.png)
+```bash
+sudo systemctl enable vsftpd
+```
 
 ---
 
@@ -1621,6 +1630,10 @@ Habilitació del servei vsftpd per iniciar-se automàticament amb l'arrencada de
 Execució de les comandes `sudo systemctl start vsftpd` i `sudo systemctl status vsftpd` per iniciar i verificar l'estat del servei. El servei està actiu (active/running) des del 10 de novembre a les 16:07, amb PID 2329, consumint 868.0K de memòria i llegint la configuració del fitxer `/etc/vsftpd.conf`.
 
 ![Estat servei vsftpd](./Photos/sprint%202/ftp/ftp4.png)
+```bash
+sudo systemctl start vsftpd
+sudo systemctl status vsftpd
+```
 
 ---
 
@@ -1629,6 +1642,9 @@ Execució de les comandes `sudo systemctl start vsftpd` i `sudo systemctl status
 Edició del fitxer de configuració principal `/etc/vsftpd.conf` amb nano per configurar els paràmetres del servidor FTP.
 
 ![Edició vsftpd.conf](./Photos/sprint%202/ftp/ftp5.png)
+```bash
+sudo nano /etc/vsftpd.conf
+```
 
 ---
 
@@ -1637,6 +1653,10 @@ Edició del fitxer de configuració principal `/etc/vsftpd.conf` amb nano per co
 Configuració del paràmetre `local_enable=YES` al fitxer vsftpd.conf per permetre que els usuaris locals del sistema puguin iniciar sessió al servidor FTP.
 
 ![Habilitació usuaris locals](./Photos/sprint%202/ftp/ftp6.png)
+```conf
+# Uncomment this to allow local users to log in.
+local_enable=YES
+```
 
 ---
 
@@ -1645,6 +1665,10 @@ Configuració del paràmetre `local_enable=YES` al fitxer vsftpd.conf per permet
 Configuració del paràmetre `anonymous_enable=NO` al fitxer vsftpd.conf per deshabilitar l'accés anònim al servidor FTP, millorant així la seguretat del sistema.
 
 ![Deshabilitació accés anònim](./Photos/sprint%202/ftp/ftp7.png)
+```conf
+# Allow anonymous FTP? (Disabled by default)
+anonymous_enable=NO
+```
 
 ---
 
@@ -1653,14 +1677,24 @@ Configuració del paràmetre `anonymous_enable=NO` al fitxer vsftpd.conf per des
 Configuració del paràmetre `write_enable=YES` al fitxer vsftpd.conf per permetre qualsevol forma de comandes d'escriptura FTP, incloent pujada, eliminació i modificació d'arxius.
 
 ![Habilitació escriptura FTP](./Photos/sprint%202/ftp/ftp8.png)
+```conf
+# Uncomment this to enable any form of FTP write command.
+write_enable=YES
+```
 
 ---
 
 #### Pas 9: Restricció d'usuaris al directori personal
 
-Configuració del paràmetre `chroot_local_user=YES` al fitxer vsftpd.conf per restringir els usuaris locals als seus directoris personals, impedint que naveguin per altres parts del sistema de fitxers per motius de seguretat.
+Configuració del paràmetre `chroot_local_user=YES` al fitxer vsftpd.conf per restringir els usuaris locals als seus directoris personals (chroot jail), impedint que naveguin per altres parts del sistema de fitxers per motius de seguretat.
 
 ![Restricció chroot](./Photos/sprint%202/ftp/ftp9.png)
+```conf
+# You may restrict local users to their home directories. See the FAQ for
+# the possible risks in this before using chroot_local_user or
+# chroot_list_enable below.
+chroot_local_user=YES
+```
 
 ---
 
@@ -1669,6 +1703,10 @@ Configuració del paràmetre `chroot_local_user=YES` al fitxer vsftpd.conf per r
 Reinici del servei vsftpd amb `sudo systemctl restart vsftpd` per aplicar els canvis de configuració. La verificació amb `sudo systemctl status vsftpd` confirma que el servei està actiu (active/running) des de les 16:13:16 amb PID 2787.
 
 ![Reinici servei vsftpd](./Photos/sprint%202/ftp/ftp10.png)
+```bash
+sudo systemctl restart vsftpd
+sudo systemctl status vsftpd
+```
 
 ---
 
@@ -1677,6 +1715,9 @@ Reinici del servei vsftpd amb `sudo systemctl restart vsftpd` per aplicar els ca
 Creació de l'usuari `usuarigroup6` amb la comanda `sudo adduser usuarigroup6`. El sistema crea l'usuari amb UID 1002, el grup usuarigroup6 (GID 1002), el directori personal `/home/usuarigroup6`, i es configura la contrasenya i la informació del usuari.
 
 ![Creació usuari FTP](./Photos/sprint%202/ftp/ftp11.png)
+```bash
+sudo adduser usuarigroup6
+```
 
 ---
 
@@ -1685,14 +1726,22 @@ Creació de l'usuari `usuarigroup6` amb la comanda `sudo adduser usuarigroup6`. 
 Creació del directori `/home/usuarigroup6/ftp` amb `sudo mkdir -p`, assignació de propietat a nobody:nogroup amb `sudo chown nobody:nogroup`, i configuració dels permisos a+w amb `sudo chmod a+w` per permetre l'escriptura a tots els usuaris.
 
 ![Configuració directori FTP](./Photos/sprint%202/ftp/ftp12.png)
+```bash
+sudo mkdir -p /home/usuarigroup6/ftp
+sudo chown nobody:nogroup /home/usuarigroup6/ftp
+sudo chmod a+w /home/usuarigroup6/ftp
+```
 
 ---
 
 #### Pas 13: Configuració del firewall per FTP
 
-Habilitació del port 22/tcp al firewall UFW amb la comanda `sudo ufw allow 22/tcp` per permetre les connexions FTP. El sistema confirma que les regles han estat actualitzades tant per IPv4 com per IPv6.
+Habilitació del port 22/tcp al firewall UFW amb la comanda `sudo ufw allow 22/tcp` per permetre les connexions SSH (nota: per FTP passiu caldria obrir també el port 21 i el rang de ports passius).
 
 ![Configuració firewall FTP](./Photos/sprint%202/ftp/ftp13.png)
+```bash
+sudo ufw allow 22/tcp
+```
 
 ---
 
@@ -1701,5 +1750,8 @@ Habilitació del port 22/tcp al firewall UFW amb la comanda `sudo ufw allow 22/t
 Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el port 2222 amb la comanda `ssh -p 2222 bchecker@192.168.6.10`. S'accedeix correctament al sistema Ubuntu 22.04.4 LTS mostrant la informació de benvinguda. El darrer login va ser el 10 de novembre a les 17:32:01 des de 192.168.6.11.
 
 ![Connexió SSH des de FTP](./Photos/sprint%202/ftp/ftp14.png)
+```bash
+ssh -p 2222 bchecker@192.168.6.10
+```
 
 ---
