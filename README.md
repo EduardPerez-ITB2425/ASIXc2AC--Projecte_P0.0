@@ -270,18 +270,6 @@ Creació de l'usuari `bchecker` amb el grup bchecker (1001) mitjançant la coman
 sudo adduser bchecker
 ```
 
-**Sortida esperada:**
-```
-Añadiendo el usuario `bchecker' ...
-Añadiendo el nuevo grupo `bchecker' (1001) ...
-Añadiendo el nuevo usuario `bchecker' (1001) con grupo `bchecker' ...
-Creando el directorio personal `/home/bchecker' ...
-Copiando los ficheros desde `/etc/skel' ...
-Nueva contraseña:
-Vuelva a escribir la nueva contraseña:
-passwd: contraseña actualizada correctamente
-```
-
 ---
 
 #### Pas 3: Configuració del fitxer named.conf.options
@@ -468,7 +456,7 @@ sudo named-checkconf
 sudo named-checkzone grup6.itb.cat /etc/bind/db.grup6.itb.cat
 sudo named-checkzone 60.168.192.in-addr.arpa /etc/bind/db.192.168.60
 ```
-d
+
 ---
 
 ### Configuració DHCP Server
@@ -541,11 +529,6 @@ Verificació que el client Ubuntu ha rebut la IP 192.168.60.30 del pool DHCP.
 ip a | grep enp3s0
 ```
 
-**Sortida esperada:**
-```
-inet 192.168.60.30/24 brd 192.168.60.255 scope global dynamic noprefixroute enp3s0
-```
-
 ---
 
 #### Pas 6: Verificació IP assignada - Client Windows
@@ -557,15 +540,6 @@ Verificació que el client Windows ha rebut la IP 192.168.60.31 del servidor DHC
 ipconfig
 ```
 
-**Sortida esperada:**
-```
-Adaptador de Ethernet Ethernet:
-   Sufijo DNS específico para la conexión. . : D-N03
-   Dirección IPv4. . . . . . . . . . . . . : 192.168.60.31
-   Máscara de subred . . . . . . . . . . . : 255.255.255.0
-   Puerta de enlace predeterminada . . . . : 192.168.60.1
-```
-
 ---
 
 #### Pas 7: Comprovació del fitxer de leases
@@ -575,22 +549,6 @@ Comprovació del fitxer de leases que mostra l'assignació d'IP al client Window
 ![Fitxer leases DHCP](./Photos/Sprint%201/DHCP7.png)
 ```bash
 sudo tail -f /var/lib/dhcp/dhcpd.leases
-```
-
-**Exemple de sortida:**
-```
-lease 192.168.60.31 {
-  starts 2 2025/10/14 14:38:11;
-  ends 2 2025/10/14 14:28:11;
-  cltt 2 2025/10/14 14:28:11;
-  binding state active;
-  next binding state free;
-  rewind binding state free;
-  hardware ethernet 52:54:00:52:e7:a3;
-  uid "\001RT\000R\347\243";
-  set vendor-class-identifier = "MSFT 5.0";
-  client-hostname "DESKTOP-JNU2BQU";
-}
 ```
 
 ---
@@ -676,25 +634,6 @@ Comprovació amb `ip a` de l'estat de totes les interfícies de xarxa del router
 ip a
 ```
 
-**Sortida esperada:**
-```
-1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536
-    link/loopback 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-
-2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500
-    link/ether 52:54:00:34:64:69
-    inet 192.168.120.72/22 brd 192.168.123.255 scope global dynamic enp1s0
-
-3: enp2s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500
-    link/ether 52:54:00:38:57:0d
-    inet 192.168.6.1/24 brd 192.168.6.255 scope global enp2s0
-
-4: enp3s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500
-    link/ether 52:54:00:1d:14:5e
-    inet 192.168.60.1/24 brd 192.168.60.255 scope global enp3s0
-```
-
 ---
 
 #### Pas 5: Configuració de les regles d'iptables
@@ -751,15 +690,6 @@ sudo iptables -L -n -v
 sudo iptables -t nat -L -n -v
 ```
 
-**Sortida esperada de `ip route show`:**
-```
-default via 192.168.120.1 dev enp1s0 proto dhcp src 192.168.120.72 metric 100
-192.168.6.0/24 dev enp2s0 proto kernel scope link src 192.168.6.1
-192.168.60.0/24 dev enp3s0 proto kernel scope link src 192.168.60.1
-192.168.120.0/22 dev enp1s0 proto kernel scope link src 192.168.120.72 metric 100
-192.168.120.1 dev enp2s0 proto dhcp scope link src 192.168.120.72 metric 100
-```
-
 ---
 
 #### Pas 7: Proves de connectivitat
@@ -781,36 +711,6 @@ ping -c 4 192.168.60.30
 
 # Client Windows (DHCP)
 ping -c 4 192.168.60.31
-```
-
-**Sortida esperada:**
-```
-# DNS
-PING 192.168.60.20 (192.168.60.20) 56(84) bytes of data.
-64 bytes from 192.168.60.20: icmp_seq=1 ttl=64 time=1.55 ms
-64 bytes from 192.168.60.20: icmp_seq=2 ttl=64 time=0.349 ms
-64 bytes from 192.168.60.20: icmp_seq=3 ttl=64 time=0.464 ms
-64 bytes from 192.168.60.20: icmp_seq=4 ttl=64 time=0.384 ms
---- 192.168.60.20 ping statistics ---
-4 packets transmitted, 4 received, 0% packet loss, time 3039ms
-
-# Cliente Ubuntu
-PING 192.168.60.30 (192.168.60.30) 56(84) bytes of data.
-64 bytes from 192.168.60.30: icmp_seq=1 ttl=64 time=1.64 ms
-64 bytes from 192.168.60.30: icmp_seq=2 ttl=64 time=0.386 ms
-64 bytes from 192.168.60.30: icmp_seq=3 ttl=64 time=0.308 ms
-64 bytes from 192.168.60.30: icmp_seq=4 ttl=64 time=0.351 ms
---- 192.168.60.30 ping statistics ---
-4 packets transmitted, 4 received, 0% packet loss, time 3046ms
-
-# Cliente Windows
-PING 192.168.60.31 (192.168.60.31) 56(84) bytes of data.
-64 bytes from 192.168.60.31: icmp_seq=1 ttl=128 time=1.65 ms
-64 bytes from 192.168.60.31: icmp_seq=2 ttl=128 time=0.583 ms
-64 bytes from 192.168.60.31: icmp_seq=3 ttl=128 time=0.500 ms
-64 bytes from 192.168.60.31: icmp_seq=4 ttl=128 time=0.452 ms
---- 192.168.60.31 ping statistics ---
-4 packets transmitted, 4 received, 0% packet loss, time 3034ms
 ```
 
 **Habilitar IP Forwarding permanent:**
@@ -876,25 +776,6 @@ echo "=== FTP ===" && ping 192.168.6.11
 echo "=== Router ===" && ping 192.168.6.1
 ```
 
-**Sortida esperada:**
-```
-=== FTP ===
-PING 192.168.6.11 (192.168.6.11) 56(84) bytes of data.
-64 bytes from 192.168.6.11: icmp_seq=1 ttl=64 time=0.509 ms
-64 bytes from 192.168.6.11: icmp_seq=2 ttl=64 time=0.200 ms
-64 bytes from 192.168.6.11: icmp_seq=3 ttl=64 time=0.344 ms
---- 192.168.6.11 ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2042ms
-
-=== Router ===
-PING 192.168.6.1 (192.168.6.1) 56(84) bytes of data.
-64 bytes from 192.168.6.1: icmp_seq=1 ttl=64 time=3.94 ms
-64 bytes from 192.168.6.1: icmp_seq=2 ttl=64 time=1.34 ms
-64 bytes from 192.168.6.1: icmp_seq=3 ttl=64 time=1.62 ms
---- 192.168.6.1 ping statistics ---
-3 packets transmitted, 3 received, 0% packet loss, time 2002ms
-```
-
 ---
 
 #### Pas 3: Configuració de regles iptables al router per al servidor web
@@ -945,14 +826,6 @@ sudo ufw enable
 
 # Verificar estat del firewall
 sudo ufw status
-```
-
-**Sortida esperada:**
-```
-Hasta          Acción         Desde
------          ------         -----
-Apache Full    ALLOW          Anywhere
-Apache Full (v6) ALLOW        Anywhere (v6)
 ```
 ```bash
 # Habilitar mòduls SSL
@@ -1048,16 +921,6 @@ sudo ufw enable
 
 # Verificar estat del firewall
 sudo ufw status
-```
-
-**Sortida esperada:**
-```
-Hasta          Acción         Desde
------          ------         -----
-Apache Full    ALLOW          Anywhere
-2222/tcp       ALLOW          Anywhere
-Apache Full (v6) ALLOW        Anywhere (v6)
-2222/tcp (v6)  ALLOW          Anywhere (v6)
 ```
 
 ---
@@ -1286,18 +1149,6 @@ Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el
 ssh -p 2222 bchecker@192.168.6.10
 ```
 
-**Sortida esperada:**
-```
-bchecker@192.168.6.10's password:
-Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 6.5.0-28-generic x86_64)
-
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/pro
-
-Last login: Mon Nov 10 17:32:01 2025 from 192.168.6.11
-```
-
 ---
 
 #### Pas 18: Instal·lació de PHP i mòduls necessaris
@@ -1343,17 +1194,6 @@ php -v
 
 # Verificar mòduls mysqli i pdo
 php -m | grep -E 'mysqli|pdo'
-```
-
-**Sortida esperada:**
-```
-PHP 8.1.2-1ubuntu2.22 (cli) (built: Jul 15 2025 12:11:22) (NTS)
-Copyright (c) The PHP Group
-Zend Engine v4.1.2, Copyright (c) Zend Technologies
-    with Zend OPcache v8.1.2-1ubuntu2.22, Copyright (c), by Zend Technologies
-
-mysqli
-pdo_mysql
 ```
 ```bash
 # Editar configuració DirectoryIndex
@@ -1443,7 +1283,7 @@ sudo apt install mysql-server
 
 #### Pas 2: Creació de la taula equipaments
 
-En aquest projecte s’ha optat per definir alguns identificadors (com register_id i institution_id) com a VARCHAR en lloc d’INTEGER, ja que els valors que provenen de les fonts originals són molt grans o no segueixen un format numèric estrictament. Emprar VARCHAR evita problemes de desbordament d’enter (overflow) i garanteix que es puguin emmagatzemar codis mixtos o identifiers que puguin incloure zeros a l’esquerra o formats no numèrics.
+En aquest projecte s'ha optat per definir alguns identificadors (com register_id i institution_id) com a VARCHAR en lloc d'INTEGER, ja que els valors que provenen de les fonts originals són molt grans o no segueixen un format numèric estrictament. Emprar VARCHAR evita problemes de desbordament d'enter (overflow) i garanteix que es puguin emmagatzemar codis mixtos o identifiers que puguin incloure zeros a l'esquerra o formats no numèrics.
 
 ![Taula equipaments](./Photos/sprint%202/BBDD/BBDD2.png)
 ```sql
