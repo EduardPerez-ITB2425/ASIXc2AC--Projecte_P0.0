@@ -853,7 +853,7 @@ Proves de connectivitat mitjançant ping des del servidor web cap al servidor FT
 
 #### Pas 3: Configuració de regles iptables al router per al servidor web
 
-Configuració de les regles d'iptables al router R-N01 per permetre l'accés al servidor web. S'afegeixen regles INPUT per acceptar tràfic des de les xarxes DMZ (192.168.6.0/24) i Intranet (192.168.60.0/24), així com per a IPs específiques del web server (192.168.6.10 i 192.168.6.11).
+Configuració de les regles d'iptables al router R-N01 per permetre l'accés al servidor web. S'afegeixen regles INPUT per acceptar tràfic des de les xarxes DMZ (192.168.6.0/24) i Intranet (192.168.60.0/24), així com per a IPs específiques del web server (192.168.6.10 i 192.168.6.11). També s'afegeix una regla final de DROP per denegar tot el tràfic no autoritzat.
 
 ![Regles iptables per Web Server](./Photos/sprint%202/web/3.png)
 
@@ -861,7 +861,7 @@ Configuració de les regles d'iptables al router R-N01 per permetre l'accés al 
 
 #### Pas 4: Instal·lació i verificació del servei Apache2
 
-Instal·lació del servidor Apache2 i verificació que el servei està actiu (active/running) des del 10 de novembre. Es mostra l'estat del servei amb PID 2266 i el hostname del servidor 192.168.121.26 192.168.6.10.
+Instal·lació del servidor Apache2 i verificació que el servei està actiu (active/running) des del 10 de novembre a les 17:08:47 CET. Es mostra l'estat del servei amb PID 2266 i múltiples processos d'Apache2 (PIDs 2266, 2269, 2270). El sistema té configurat el hostname amb les IPs 192.168.121.26 i 192.168.6.10.
 
 ![Estat servei Apache2](./Photos/sprint%202/web/4.png)
 
@@ -869,7 +869,7 @@ Instal·lació del servidor Apache2 i verificació que el servei està actiu (ac
 
 #### Pas 5: Configuració del firewall UFW i SSL
 
-Verificació de l'estat del servei Apache2, configuració del hostname, habilitació de la regla UFW per "Apache Full" (ports 80 i 443), i habilitació dels mòduls SSL necessaris (ssl, socache_shmcb). El servei està actiu i escoltant en múltiples ports incloent 80, 443 i [::]:22.
+Verificació de l'estat del servei Apache2 i configuració del hostname. S'habilita la regla UFW per "Apache Full" (ports 80 i 443 HTTP/HTTPS) amb `sudo ufw allow 'Apache Full'`. Es comprova l'estat del firewall UFW mostrant les regles actives per Apache Full tant en IPv4 com IPv6. S'habiliten els mòduls SSL necessaris amb `sudo a2enmod ssl`, activant les dependències setenvif, mime i socache_shmcb. El servei està actiu i escoltant en múltiples ports.
 
 ![Configuració UFW i SSL](./Photos/sprint%202/web/5.png)
 
@@ -877,7 +877,7 @@ Verificació de l'estat del servei Apache2, configuració del hostname, habilita
 
 #### Pas 6: Habilitació de mòduls SSL i configuració del lloc per defecte
 
-Execució de la comanda `sudo a2enmod ssl` per habilitar els mòduls SSL (setenvif, mime, socache_shmcb, ssl). Després s'habilita el lloc SSL per defecte amb `sudo a2ensite default-ssl.conf` i es recarrega Apache2. Es verifica la configuració amb `apache2ctl configtest` mostrant un warning sobre el ServerName.
+Execució de la comanda `sudo a2enmod ssl` confirmant que els mòduls SSL ja estan habilitats (setenvif, mime, socache_shmcb, ssl). S'habilita el lloc SSL per defecte amb `sudo a2ensite default-ssl.conf`. Es recarrega Apache2 amb `sudo systemctl reload apache2`. Es verifica la configuració amb `apache2ctl configtest` mostrant un warning sobre el ServerName (AH00558) i retornant "Syntax OK".
 
 ![Habilitació SSL i configuració](./Photos/sprint%202/web/6.png)
 
@@ -885,7 +885,7 @@ Execució de la comanda `sudo a2enmod ssl` per habilitar els mòduls SSL (setenv
 
 #### Pas 7: Accés HTTP al servidor web des del navegador
 
-Accés al servidor web mitjançant el navegador Firefox a l'adreça http://192.168.6.10 mostrant la pàgina per defecte d'Apache2 Ubuntu. Es visualitza la pàgina de benvinguda confirmant que el servidor web està operatiu i accessible des de la xarxa.
+Accés al servidor web mitjançant el navegador Firefox a l'adreça http://192.168.6.10 mostrant la pàgina per defecte d'Apache2 Ubuntu. Es visualitza el logo d'Ubuntu i el títol "Ubuntu" amb el text "This is the default welcome page..." confirmant que el servidor web està operatiu i accessible des de la xarxa. La pàgina mostra la secció "Configuration Overview" amb l'estructura de directoris d'Apache2.
 
 ![Accés HTTP al Web Server](./Photos/sprint%202/web/7.png)
 
@@ -893,7 +893,7 @@ Accés al servidor web mitjançant el navegador Firefox a l'adreça http://192.1
 
 #### Pas 8: Advertència de seguretat al accedir per HTTPS
 
-Intent d'accés al servidor web mitjançant HTTPS (https://192.168.6.10). Firefox detecta un risc de seguretat potencial perquè el certificat SSL és autosignat (self-signed). Es mostra l'error "MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT" amb opcions per retrocedir o acceptar el risc.
+Intent d'accés al servidor web mitjançant HTTPS (https://192.168.6.10). Firefox detecta un risc de seguretat potencial amb el missatge "Warning: Potential Security Risk Ahead". El navegador indica que 192.168.6.10 utilitza un certificat de seguretat invàlid perquè és autosignat (self-signed). Es mostra l'error "MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT" amb opcions per retrocedir ("Go Back (Recommended)") o acceptar el risc ("Accept the Risk and Continue").
 
 ![Advertència certificat SSL](./Photos/sprint%202/web/8.png)
 
@@ -901,7 +901,7 @@ Intent d'accés al servidor web mitjançant HTTPS (https://192.168.6.10). Firefo
 
 #### Pas 9: Accés HTTPS exitós després d'acceptar el certificat
 
-Després d'acceptar el risc de seguretat, s'accedeix correctament al servidor web per HTTPS (https://192.168.6.10) mostrant la mateixa pàgina per defecte d'Apache2 Ubuntu. Això confirma que el servidor està funcionant tant en HTTP com en HTTPS.
+Després d'acceptar el risc de seguretat, s'accedeix correctament al servidor web per HTTPS (https://192.168.6.10). Es mostra la mateixa pàgina per defecte d'Apache2 Ubuntu amb el missatge "Apache2 Ubuntu Default Page: It works". El navegador mostra el logo d'Ubuntu i confirma que el servidor està funcionant tant en HTTP com en HTTPS. Això verifica que el certificat SSL autosignat està funcionant correctament.
 
 ![Accés HTTPS al Web Server](./Photos/sprint%202/web/9.png)
 
@@ -909,7 +909,7 @@ Després d'acceptar el risc de seguretat, s'accedeix correctament al servidor we
 
 #### Pas 10: Configuració del servei SSH
 
-Verificació de l'estat del servei SSH amb `sudo systemctl status ssh` mostrant que està actiu des de les 17:02. Es configura el fitxer `/etc/ssh/sshd_config`, es reinicia el servei, i s'afegeix la regla UFW per permetre el port 2222/tcp. L'estat del firewall mostra les regles actives per Apache Full i SSH (port 2222).
+Verificació de l'estat del servei SSH amb `sudo systemctl status ssh` mostrant que està actiu (active/running) des del 10 de novembre a les 17:02:10 CET. El servei OpenSSH (sshd) té PID 621 i està escoltant en el port 22 (0.0.0.0 i ::). S'edita el fitxer de configuració `/etc/ssh/sshd_config` amb nano i es reinicia el servei amb `sudo systemctl restart ssh`. S'afegeix la regla UFW per permetre el port 2222/tcp amb `sudo ufw allow 2222/tcp`. S'habilita el firewall amb `sudo ufw enable`. L'estat del firewall amb `sudo ufw status` mostra les regles actives: Apache Full (80,443/tcp) i 2222/tcp, ambdues des de "Anywhere" tant en IPv4 com IPv6. Finalment es verifica novament l'estat del servei SSH confirmant que està actiu amb PID 4118.
 
 ![Configuració servei SSH](./Photos/sprint%202/web/10.png)
 
@@ -917,7 +917,14 @@ Verificació de l'estat del servei SSH amb `sudo systemctl status ssh` mostrant 
 
 #### Pas 11: Configuració detallada del fitxer sshd_config
 
-Visualització del fitxer de configuració `/etc/ssh/sshd_config` amb nano mostrant els paràmetres principals: Port 2222, autenticació per clau pública habilitada (PubkeyAuthentication yes), login de root deshabilitat (PermitRootLogin no), i configuració de logging i autenticació.
+Visualització del fitxer de configuració `/etc/ssh/sshd_config` amb nano mostrant els paràmetres principals de seguretat:
+- **Port 2222:** Port personalitzat per SSH
+- **PermitRootLogin no:** Deshabilita l'accés root directe
+- **PubkeyAuthentication yes:** Habilita autenticació per clau pública
+- **SyslogFacility AUTH:** Configuració de logging
+- **LogLevel INFO:** Nivell de registre d'esdeveniments
+
+El fitxer també inclou la directiva `Include /etc/ssh/sshd_config.d/*.conf` per incloure configuracions addicionals.
 
 ![Configuració sshd_config](./Photos/sprint%202/web/11.png)
 
@@ -925,7 +932,21 @@ Visualització del fitxer de configuració `/etc/ssh/sshd_config` amb nano mostr
 
 #### Pas 12: Configuració d'iptables al router per SSH
 
-Configuració de les regles d'iptables al router R-N01 per permetre l'accés SSH al servidor web. S'afegeixen regles INPUT per permetre: loopback, connexions establertes, ping (ICMP), SSH al router (port 22), accés des de les xarxes DMZ i Intranet, i accés a IPs específiques del web server. També s'afegeix una regla FORWARD bidireccional entre les xarxes DMZ i Intranet.
+Configuració de les regles d'iptables al router R-N01 per permetre l'accés SSH i gestionar el tràfic de xarxa. Les regles inclouen:
+
+**INPUT:**
+- Permetre loopback (tràfic local)
+- Permetre connexions ja establertes
+- Permetre ping (ICMP)
+- Permetre SSH al router (port 22)
+- Permetre accés des de les xarxes DMZ (192.168.6.0/24) i Intranet (192.168.60.0/24)
+- Permetre accés des d'IPs específiques (192.168.6.10, 192.168.6.11, 192.168.60.15)
+
+**FORWARD:**
+- Regla bidireccional entre DMZ i Intranet amb `sudo iptables -A FORWARD -i enp2s0 -o enp3s0 -s 192.168.6.0/24 -d 192.168.60.0/24 -j ACCEPT`
+- Regla inversa amb `sudo iptables -A FORWARD -i enp3s0 -o enp2s0 -s 192.168.60.0/24 -d 192.168.6.0/24 -j ACCEPT`
+
+També s'executa `sudo sysctl -w net.ipv4.ip_forward=1` per habilitar el forwarding de paquets IPv4 de forma temporal.
 
 ![Regles iptables per SSH](./Photos/sprint%202/web/12.png)
 
@@ -933,7 +954,7 @@ Configuració de les regles d'iptables al router R-N01 per permetre l'accés SSH
 
 #### Pas 13: Configuració del forwarding IPv4 al router
 
-Edició del fitxer `/etc/sysctl.conf` al router amb nano per habilitar el forwarding de paquets IPv4. Es descomenta la línia `net.ipv4.ip_forward=1` per permetre que el router encamini paquets entre diferents interfícies de xarxa.
+Edició del fitxer `/etc/sysctl.conf` al router amb nano per habilitar permanentment el forwarding de paquets IPv4. Es descomenta la línia `net.ipv4.ip_forward=1` per permetre que el router encamini paquets entre diferents interfícies de xarxa (DMZ, Intranet i NAT). Aquesta configuració és essencial per al funcionament del router com a gateway entre les diferents zones de seguretat.
 
 ![Configuració IP forwarding](./Photos/sprint%202/web/13.png)
 
@@ -941,7 +962,13 @@ Edició del fitxer `/etc/sysctl.conf` al router amb nano per habilitar el forwar
 
 #### Pas 14: Creació i habilitació del servei de persistència d'iptables
 
-Creació de l'script `/usr/local/bin/iptables-rules.sh` i del servei systemd `/etc/systemd/system/iptables-rules.service` per fer persistents les regles d'iptables. S'habilita i s'inicia el servei amb `systemctl enable/start iptables-rules.service`. La verificació mostra que el servei està actiu (active/exited) i s'ha carregat correctament.
+Creació de l'script `/usr/local/bin/iptables-rules.sh` amb permisos d'execució (`chmod +x`) i del servei systemd `/etc/systemd/system/iptables-rules.service` per fer persistents les regles d'iptables després de reinicis. El servei es configura amb:
+- **Type=oneshot:** Execució única
+- **ExecStart:** Carrega les regles des de l'script
+- **RemainAfterExit=yes:** Manté el servei actiu
+- **WantedBy=multi-user.target:** S'inicia en mode multiusuari
+
+S'executa `sudo systemctl daemon-reload` per recarregar la configuració de systemd. S'habilita amb `sudo systemctl enable iptables-rules.service` creant el symlink corresponent. S'inicia amb `sudo systemctl start iptables-rules.service`. La verificació amb `sudo systemctl status iptables-rules.service` mostra que el servei està **active (exited)** des del 17 de novembre a les 16:05:05 CET amb PID 2176 i status=0/SUCCESS. El contingut del servei es verifica amb `sudo cat /etc/systemd/system/iptables-rules.service`.
 
 ![Servei persistència iptables](./Photos/sprint%202/web/14.png)
 
@@ -949,15 +976,27 @@ Creació de l'script `/usr/local/bin/iptables-rules.sh` i del servei systemd `/e
 
 #### Pas 15: Creació del servei de ruta estàtica al router (Servidor Web)
 
-Visualització del fitxer `/etc/systemd/system/add-static-route.service` al servidor web (W-NCC) que configura una ruta estàtica cap a la xarxa Intranet (192.168.60.0/24) via el router (192.168.6.1). Aquest servei s'executa després de la xarxa estar disponible.
+Visualització del fitxer `/etc/systemd/system/add-static-route.service` al servidor web (W-NCC) que configura una ruta estàtica cap a la xarxa Intranet. El servei està configurat amb:
+- **Description:** "Agregar ruta estática al iniciar"
+- **After=network-online.target:** S'executa després que la xarxa estigui disponible
+- **Wants=network-online.target:** Depèn de la xarxa
+- **Type=oneshot:** Execució única
+- **ExecStart:** `/usr/sbin/ip route replace 192.168.60.0/24 via 192.168.6.1`
+- **RemainAfterExit=yes:** Manté el servei actiu
+- **WantedBy=multi-user.target:** S'inicia automàticament
+
+Aquesta ruta permet al servidor web de la DMZ comunicar-se amb la xarxa Intranet a través del router.
 
 ![Servei ruta estàtica Web Server](./Photos/sprint%202/web/15.png)
 
 ---
 
-#### Pas 16: Verificació del servei de ruta estàtica
+#### Pas 16: Verificació del servei de ruta estàtica al servidor de base de dades
 
-Comprovació del contingut del fitxer `/etc/systemd/system/add-static-route.service` al servidor de base de dades (B-N06) amb una configuració similar, establint la ruta estàtica cap a la xarxa DMZ (192.168.6.0/24) via el router de la Intranet (192.168.60.1).
+Comprovació del contingut del fitxer `/etc/systemd/system/add-static-route.service` al servidor de base de dades (B-N06) amb una configuració similar al del servidor web. El servei estableix la ruta estàtica amb:
+- **ExecStart:** `/usr/sbin/ip route replace 192.168.6.0/24 via 192.168.60.1`
+
+Aquesta configuració permet al servidor de base de dades de la Intranet comunicar-se amb la DMZ a través del router. La ruta apunta a la xarxa DMZ (192.168.6.0/24) via el gateway de la Intranet (192.168.60.1).
 
 ![Verificació ruta estàtica Database](./Photos/sprint%202/web/16.png)
 
@@ -965,49 +1004,142 @@ Comprovació del contingut del fitxer `/etc/systemd/system/add-static-route.serv
 
 #### Pas 17: Connexió SSH des del servidor FTP al Web Server
 
-Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el port 2222 amb la comanda `ssh -p 2222 bchecker@192.168.6.10`. S'accedeix correctament al sistema Ubuntu 22.04.4 LTS mostrant informació de documentació, management i suport. El darrer login va ser des de 192.168.6.11.
+Connexió SSH exitosa des del servidor FTP (F-NCC) al servidor web utilitzant el port personalitzat 2222 amb la comanda `ssh -p 2222 bchecker@192.168.6.10`. S'introdueix la contrasenya de l'usuari bchecker i s'accedeix correctament al sistema Ubuntu 22.04.4 LTS (GNU/Linux 6.5.0-28-generic x86_64). 
+
+El sistema mostra informació de:
+- **Documentation:** https://help.ubuntu.com
+- **Management:** https://landscape.canonical.com
+- **Support:** https://ubuntu.com/pro
+
+S'inclou la nota sobre "ABSOLUTELY NO WARRANTY" i els termes de distribució del software lliure. El darrer login va ser el dilluns 10 de novembre a les 17:32:01 2025 des de 192.168.6.11 (servidor FTP). Es mostra un missatge indicant que no es pot canviar al directori personal de bchecker i suggereix executar comandes com a administrador amb sudo. Finalment es mostra el prompt `bchecker@W-NCC:/$` confirmant l'accés exitós.
 
 ![Connexió SSH FTP a Web](./Photos/sprint%202/web/17.png)
 
 ---
 
-#### Pas 18: Configuració del DirectoryIndex per PHP
+#### Pas 18: Instal·lació de PHP i mòduls necessaris
 
-Edició del fitxer `/etc/apache2/mods-enabled/dir.conf` amb nano per configurar l'ordre del DirectoryIndex. S'estableix que index.php tingui prioritat sobre els altres fitxers d'índex (index.html, index.cgi, etc.).
+Instal·lació dels paquets PHP essencials per al funcionament de l'aplicació web amb la comanda:
+```bash
+sudo apt install php libapache2-mod-php php-mysql php-cli php-curl php-json php-mbstring php-xml php-gd -y
+```
 
-![Configuració DirectoryIndex](./Photos/sprint%202/web/19.png)
+El procés instal·la els següents paquets:
+- **libapache2-mod-php8.1:** Mòdul PHP per Apache
+- **php8.1-cli:** Interfície de línia de comandes de PHP
+- **php8.1-common:** Arxius comuns de PHP
+- **php8.1-curl:** Mòdul cURL per PHP
+- **php8.1-gd:** Mòdul GD per manipulació d'imatges
+- **php8.1-json:** Mòdul JSON
+- **php8.1-mbstring:** Mòdul per strings multibyte
+- **php8.1-mysql:** Mòdul MySQL per PHP
+- **php8.1-opcache:** Caché d'opcodes
+- **php8.1-readline:** Mòdul readline
+- **php8.1-xml:** Mòdul XML
+
+El sistema indica que s'instal·laran 22 paquets nous (0 actualitzats, 0 per eliminar, 362 no actualitzats) amb un total de 6.128 kB d'arxius.
+
+![Instal·lació PHP](./Photos/sprint%202/web/18.png)
 
 ---
 
-#### Pas 19: Verificació de la instal·lació de PHP
+#### Pas 20: Verificació de la instal·lació de PHP i mòduls
 
-Comprovació de la versió de PHP instal·lada mostrant PHP 8.1.2-1ubuntu2.22 amb Zend Engine v4.1.2 i Zend OPcache v8.1.2. S'executa la comanda `php -m | grep -E 'mysqli|pdo'` per verificar que els mòduls mysqli i pdo_mysql estan instal·lats correctament.
+Comprovació de la versió de PHP instal·lada amb la comanda `php -v` mostrant:
+- **PHP 8.1.2-1ubuntu2.22 (cli)** compilat el 15 de juliol de 2025
+- **Zend Engine v4.1.2** amb Copyright de Zend Technologies
+- **Zend OPcache v8.1.2-1ubuntu2.22** habilitat
+
+Verificació dels mòduls MySQL amb `php -m | grep -E 'mysqli|pdo'` confirmant que els mòduls **mysqli**, **nd_mysqli** i **pdo_mysql** estan instal·lats i disponibles. Aquests mòduls són essencials per a la connexió de PHP amb la base de dades MySQL.
+
+Finalment, s'edita el fitxer `/etc/apache2/mods-enabled/dir.conf` amb nano per assegurar que index.php tingui prioritat en el DirectoryIndex.
 
 ![Verificació PHP i mòduls](./Photos/sprint%202/web/20.png)
 
 ---
 
-#### Pas 20: Creació de l'arxiu test.php i configuració de permisos
+#### Pas 21: Creació de l'arxiu test.php i configuració de permisos
 
-Creació de l'arxiu `/var/www/html/test.php` amb la funció `phpinfo();` per mostrar la informació de configuració de PHP. Es configuren els permisos adequats amb `chown www-data:www-data` i `chmod 644`. Es verifica el contingut del fitxer mostrant el codi PHP bàsic.
+Creació de l'arxiu `/var/www/html/test.php` amb el contingut bàsic `<?php phpinfo(); ?>` per mostrar la informació completa de configuració de PHP. Es configuren els permisos adequats:
+- `sudo chown www-data:www-data /var/www/html/test.php` per assignar la propietat a l'usuari del servidor web
+- `sudo chmod 644 /var/www/html/test.php` per establir permisos de lectura/escriptura per al propietari i només lectura per a altres
 
-![Creació test.php](./Photos/sprint%202/web/21.png)
+Es verifica el contingut del fitxer amb `sudo cat /var/www/html/test.php` mostrant el codi PHP que crida a la funció phpinfo().
+
+Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgina d'informació de PHP. Es visualitza:
+- **PHP Version 8.1.2-1ubuntu2.22** amb el logo de PHP
+- Informació del sistema amb TMPT_DYNAMIC del dijous 4 d'abril a les 14:38
+- Taula amb paràmetres de configuració incloent System, Build Date, Build System, Server API, Virtual Directory Support, Configuration File, Loaded Configuration File
+- Valors de PHP API, PHP Extension, Zend Extension
+- Debug Build: no
+- Thread Safety: disabled
+- Zend Signal Handling: enabled
+- Zend Memory Manager: enabled
+- Zend Multibyte Support: provided by mbstring
+- IPv6 Support: enabled
+- DTrace Support: available, disabled
+- Registered PHP Streams amb múltiples protocols suportats
+
+![Creació test.php i phpinfo](./Photos/sprint%202/web/21.png)
 
 ---
 
-#### Pas 21: Accés web a test.php i verificació de PHP
+#### Pas 22: Verificació completa de la configuració PHP
 
-Accés mitjançant el navegador a http://192.168.6.10/test.php mostrant la pàgina d'informació de PHP (phpinfo). Es visualitza la versió PHP 8.1.2-1ubuntu2.22 amb informació detallada del sistema, build date, server API, directives de configuració, PHP Extension, Zend Extension i altres paràmetres de configuració de PHP.
+Vista ampliada de la pàgina phpinfo() accessible a http://192.168.6.10/test.php mostrant informació detallada sobre la configuració de PHP. La captura mostra:
 
-![Visualització phpinfo()](./Photos/sprint%202/web/22.png)
+**Informació general:**
+- PHP Version 8.1.2-1ubuntu2.22
+- System, Build Date, Build System, Server API
+- Virtual Directory Support, Configuration File
+- Loaded Configuration Files amb la llista completa d'arxius .ini carregats
+
+**Extensions i mòduls carregats:**
+S'observa una llarga llista d'arxius de configuració en el directori `/etc/php/8.1/apache2/conf.d/` incloent:
+- 10-opcache.ini
+- 20-calendar.ini, 20-ctype.ini, 20-curl.ini
+- 20-exif.ini, 20-ffi.ini, 20-fileinfo.ini
+- 20-ftp.ini, 20-gd.ini, 20-gettext.ini
+- 20-iconv.ini, 20-mbstring.ini, 20-mysqli.ini
+- 20-pdo.ini, 20-pdo_mysql.ini
+- 20-posix.ini, 20-readline.ini
+- 20-shmop.ini, 20-simplexml.ini
+- 20-sockets.ini, 20-sysvmsg.ini
+- 20-tokenizer.ini, 20-xmlreader.ini, 20-xmlwriter.ini, 20-xsl.ini
+
+**Paràmetres tècnics:**
+- PHP API: 20210902
+- PHP Extension: 20210902
+- Zend Extension: 420210902
+- Zend Extension Build: API420210902,NTS
+- PHP Extension Build: API20210902,NTS
+- Debug Build: no
+- Thread Safety: disabled
+- Zend Signal Handling: enabled
+- Zend Memory Manager: enabled
+- Zend Multibyte Support: provided by mbstring
+- IPv6 Support: enabled
+- DTrace Support: available, disabled
+- Registered PHP Streams: php, file, glob, data, http, ftp, phar
+
+Aquesta verificació confirma que PHP està correctament instal·lat i configurat amb tots els mòduls necessaris per executar l'aplicació web, especialment els mòduls de connexió a MySQL (mysqli, pdo_mysql) que són essencials per a la consulta de la base de dades.
+
+![Detall complet configuració PHP](./Photos/sprint%202/web/22.png)
 
 ---
 
-#### Pas 22: Detall complet de la configuració PHP
+#### Pas 19: Configuració del DirectoryIndex per PHP
 
-Vista ampliada de la pàgina phpinfo() mostrant informació completa sobre la configuració de PHP incloent: System, Build Date, Build System, Server API, Virtual Directory Support, Configuration File, Loaded Configuration File, extensions carregades, PHP API, PHP Extension, Zend Extension, Debug Build, Thread Safety, i altres paràmetres tècnics del servidor PHP.
+Edició del fitxer `/etc/apache2/mods-enabled/dir.conf` amb nano per configurar l'ordre del DirectoryIndex. S'estableix que `index.php` tingui prioritat sobre els altres fitxers d'índex:
+```apache
+DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+```
 
-![Detall configuració PHP](./Photos/sprint%202/web/22.png)
+Aquesta configuració assegura que Apache buscarà primer els arxius index.php abans de buscar index.html o altres fitxers d'índex, prioritzant així les pàgines dinàmiques PHP sobre les estàtiques HTML.
+
+![Configuració DirectoryIndex](./Photos/sprint%202/web/19.png)
+
+---
 
 ---
 
