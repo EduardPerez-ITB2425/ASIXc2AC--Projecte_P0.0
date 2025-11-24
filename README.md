@@ -1760,7 +1760,6 @@ Comprovació dels permisos i propietaris dels fitxers principals de l'aplicació
 - **index.html:** Propietari root:root amb permisos 644 (rw-r--r--), mida 20097 bytes
 - **api.php:** Propietari www-data:www-data amb permisos 644 (rw-r--r--), mida 3480 bytes
 
-![Verificació fitxers aplicació](./Photos/sprint%203/web1.png)
 ```bash
 # Navegar al directori web
 cd /var/www/html/
@@ -1776,7 +1775,6 @@ ls -ld api.php
 
 Creació del fitxer `/var/www/html/index.html` que conté la interfície frontend de l'aplicació web. Aquest fitxer inclou HTML5, CSS3 amb gradients i animacions, i JavaScript per gestionar la comunicació amb l'API.
 
-![Creació index.html](./Photos/sprint%203/web2.png)
 ```bash
 # Crear/editar el fitxer index.html
 sudo nano /var/www/html/index.html
@@ -2386,7 +2384,6 @@ sudo nano /var/www/html/index.html
 
 Creació del fitxer `/var/www/html/api.php` que actua com a backend REST API. Gestiona la connexió amb MySQL (192.168.60.15), implementa endpoints per diferents accions, i inclou mesures de seguretat com validació de consultes.
 
-![Creació api.php](./Photos/sprint%203/web3.png)
 ```bash
 # Crear/editar el fitxer api.php
 sudo nano /var/www/html/api.php
@@ -2513,7 +2510,6 @@ try {
 
 Configuració dels permisos adequats per als fitxers de l'aplicació web. S'assigna la propietat de `api.php` a l'usuari `www-data` (utilitzat per Apache) i es configuren els permisos correctes.
 
-![Configuració permisos](./Photos/sprint%203/web4.png)
 ```bash
 # Assignar propietari a index.html
 sudo chown root:root /var/www/html/index.html
@@ -2534,7 +2530,6 @@ ls -l /var/www/html/api.php
 
 Reinici del servei Apache2 per aplicar tots els canvis realitzats i verificació que el servei està actiu correctament.
 
-![Reinici Apache2](./Photos/sprint%203/web5.png)
 ```bash
 # Reiniciar Apache2
 sudo systemctl restart apache2
@@ -2552,10 +2547,8 @@ sudo systemctl status apache2
 #### Frontend (index.html)
 - **Interfície moderna** amb gradient dark theme (blau i gris)
 - **Animacions CSS** (fadeIn, slideUp, pulse)
-- **Disseny responsiu** amb grid layout adaptatiu
 - **Indicador d'estat** de connexió amb MySQL en temps real
 - **Selecció dinàmica** de bases de dades i taules
-- **Visualització de dades** en taules HTML amb scroll horitzontal
 - **Consultes SQL personalitzades** amb validació
 - **Estadístiques en temps real** (database, table, total records)
 
@@ -2574,7 +2567,7 @@ sudo systemctl status apache2
 ## Accés a l'Aplicació Web
 ```bash
 # Des del navegador accedir a:
-http://192.168.6.10
+https://192.168.6.10
 ```
 
 **Flux de funcionament:**
@@ -2596,7 +2589,7 @@ Resultat: ✓ Connected to 192.168.60.15
 
 ### Prova 2: Llistat de bases de dades
 ```
-Resultat: EquipamentsBCN, information_schema, mysql, performance_schema, sys
+Resultat: EquipamentsBARNA, information_schema, mysql, performance_schema, sys
 ```
 
 ### Prova 3: Consulta personalitzada
@@ -2606,10 +2599,10 @@ SELECT nom, latitude, longitude FROM equipaments LIMIT 10
 
 ### Prova 4: Validació de seguretat
 ```sql
-DELETE FROM equipaments WHERE register_id = '1'
+DELETE FROM equipamentsBARNA WHERE register_id = '1'
 ```
 ```
-Resultat: Error "Solo se permiten consultas SELECT por seguridad"
+Resultat: Query error: SOlo se permiten consultas SELECT por seguridad"
 ```
 
 ---
