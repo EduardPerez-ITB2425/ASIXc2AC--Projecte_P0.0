@@ -1746,3 +1746,870 @@ ssh -p 2222 bchecker@192.168.6.10
 ```
 
 ---
+
+# 3 - Configuració de l'Aplicació Web
+
+
+---
+
+## Configuració de l'Aplicació Web
+
+### Pas 1: Verificació dels fitxers de l'aplicació web
+
+Comprovació dels permisos i propietaris dels fitxers principals de l'aplicació web al directori `/var/www/html/`:
+- **index.html:** Propietari root:root amb permisos 644 (rw-r--r--), mida 20097 bytes
+- **api.php:** Propietari www-data:www-data amb permisos 644 (rw-r--r--), mida 3480 bytes
+
+![Verificació fitxers aplicació](./Photos/sprint%203/web1.png)
+```bash
+# Navegar al directori web
+cd /var/www/html/
+
+# Verificar permisos i propietaris dels fitxers
+ls -ld index.html
+ls -ld api.php
+```
+
+---
+
+### Pas 2: Creació del fitxer index.html
+
+Creació del fitxer `/var/www/html/index.html` que conté la interfície frontend de l'aplicació web. Aquest fitxer inclou HTML5, CSS3 amb gradients i animacions, i JavaScript per gestionar la comunicació amb l'API.
+
+![Creació index.html](./Photos/sprint%203/web2.png)
+```bash
+# Crear/editar el fitxer index.html
+sudo nano /var/www/html/index.html
+```
+
+**Contingut complet del fitxer index.html:**
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySQL Dashboard - Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1f35 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e6ed;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: #e0e6ed;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-in;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(59, 130, 246, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.8;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .controls {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .controls h2 {
+            color: #60a5fa;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            background: rgba(15, 23, 42, 0.7);
+            color: #e0e6ed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        select {
+            white-space: normal;
+            height: auto;
+            min-height: 44px;
+        }
+
+        select option {
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            padding: 8px;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        button {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: #fff;
+            border: 1px solid #dc2626;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.95em;
+            color: #cbd5e1;
+        }
+
+        .status-indicator span {
+            flex: 1;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+        }
+
+        .status-dot.disconnected {
+            background: #ef4444;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+        }
+
+        .data-container {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            animation: slideUp 1s ease-out;
+        }
+
+        .data-container h2 {
+            color: #60a5fa;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid rgba(71, 85, 105, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(15, 23, 42, 0.6);
+            table-layout: auto;
+        }
+
+        th {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            color: #e0e6ed;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            max-width: 300px;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+            color: #cbd5e1;
+            font-size: 0.9em;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            max-width: 300px;
+        }
+
+        tr:hover {
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(71, 85, 105, 0.3);
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #60a5fa;
+            margin: 10px 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+            font-size: 1em;
+        }
+
+        .error {
+            background: rgba(220, 38, 38, 0.1);
+            color: #fca5a5;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc2626;
+            font-size: 0.9em;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sprint3 - MySQL</h1>
+            <p>(Hamza.Tayibi-Eduard.Pérez-Guim.Ballvé-Francesc.Martínez)</p>
+        </div>
+
+        <div class="status">
+            <div class="status-indicator">
+                <div class="status-dot disconnected" id="statusDot"></div>
+                <span id="statusText">Connecting to server...</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2>Control Panel</h2>
+            <div class="form-group">
+                <label for="dbSelect">Select Database:</label>
+                <select id="dbSelect">
+                    <option value="">-- First connect to server --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tableSelect">Select Table:</label>
+                <select id="tableSelect">
+                    <option value="">-- First select a database --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="customQuery">Custom SQL Query (optional):</label>
+                <input type="text" id="customQuery" placeholder="SELECT * FROM table WHERE...">
+                <button onclick="executeCustomQuery()">Execute Query</button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid" style="display:none;"></div>
+
+        <div class="data-container">
+            <h2>Table Data</h2>
+            <div id="errorMessage"></div>
+            <div id="dataDisplay" class="loading">
+                Please connect to server and select a database
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'api.php';
+        let currentDB = '';
+        let currentTable = '';
+
+        async function connectToServer() {
+            document.getElementById('statusText').textContent = 'Connecting...';
+           
+            try {
+                const response = await fetch(`${API_URL}?action=connect`);
+                const data = await response.json();
+               
+                if (data.success) {
+                    document.getElementById('statusDot').className = 'status-dot connected';
+                    document.getElementById('statusText').textContent = 'Connected to 192.168.60.15';
+                    loadDatabases();
+                } else {
+                    throw new Error(data.error || 'Connection error');
+                }
+            } catch (error) {
+                document.getElementById('statusDot').className = 'status-dot disconnected';
+                document.getElementById('statusText').textContent = 'Error: ' + error.message;
+                document.getElementById('errorMessage').innerHTML = `<div class="error">Could not connect to server. Verify that api.php is configured correctly.</div>`;
+            }
+        }
+
+        async function loadDatabases() {
+            try {
+                const response = await fetch(`${API_URL}?action=getDatabases`);
+                const databases = await response.json();
+               
+                if (databases.error) {
+                    throw new Error(databases.error);
+                }
+               
+                const select = document.getElementById('dbSelect');
+                select.innerHTML = '<option value="">-- Select a database --</option>';
+               
+                databases.forEach(db => {
+                    const option = document.createElement('option');
+                    option.value = db;
+                    option.textContent = db;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                document.getElementById('errorMessage').innerHTML = `<div class="error">Error loading databases: ${error.message}</div>`;
+            }
+        }
+
+        document.getElementById('dbSelect').addEventListener('change', function() {
+            currentDB = this.value;
+            if (currentDB) {
+                loadTables();
+            }
+        });
+
+        async function loadTables() {
+            try {
+                const response = await fetch(`${API_URL}?action=getTables&db=${encodeURIComponent(currentDB)}`);
+                const tables = await response.json();
+               
+                if (tables.error) {
+                    throw new Error(tables.error);
+                }
+               
+                const select = document.getElementById('tableSelect');
+                select.innerHTML = '<option value="">-- Select a table --</option>';
+               
+                tables.forEach(table => {
+                    const option = document.createElement('option');
+                    option.value = table;
+                    option.textContent = table;
+                    select.appendChild(option);
+                });
+               
+                if (tables.length === 0) {
+                    document.getElementById('errorMessage').innerHTML = `<div class="error">No tables found in database "${currentDB}"</div>`;
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').innerHTML = `<div class="error">Error loading tables: ${error.message}</div>`;
+            }
+        }
+
+        document.getElementById('tableSelect').addEventListener('change', function() {
+            currentTable = this.value;
+            if (currentTable) {
+                loadTableData();
+            }
+        });
+
+        async function loadTableData() {
+            document.getElementById('dataDisplay').innerHTML = '<div class="loading">Loading data...</div>';
+            document.getElementById('errorMessage').innerHTML = '';
+           
+            try {
+                const response = await fetch(`${API_URL}?action=getData&db=${encodeURIComponent(currentDB)}&table=${encodeURIComponent(currentTable)}`);
+                const result = await response.json();
+               
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+               
+                if (result.length === 0) {
+                    document.getElementById('dataDisplay').innerHTML = '<p>No data in this table</p>';
+                    showStats(0);
+                } else {
+                    displayData(result);
+                    showStats(result.length);
+                }
+            } catch (error) {
+                document.getElementById('errorMessage').innerHTML = `<div class="error">Error loading data: ${error.message}</div>`;
+                document.getElementById('dataDisplay').innerHTML = '';
+            }
+        }
+
+        function displayData(data) {
+            if (data.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<p>No data in this table</p>';
+                return;
+            }
+
+            const keys = Object.keys(data[0]);
+           
+            let html = '<div class="table-wrapper"><table>';
+            html += '<thead><tr>';
+            keys.forEach(key => {
+                html += `<th>${key}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+           
+            data.forEach(row => {
+                html += '<tr>';
+                keys.forEach(key => {
+                    html += `<td>${row[key]}</td>`;
+                });
+                html += '</tr>';
+            });
+           
+            html += '</tbody></table></div>';
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function showStats(count) {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.style.display = 'grid';
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Database</div>
+                    <div class="stat-number">${currentDB}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Table</div>
+                    <div class="stat-number">${currentTable}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Records</div>
+                    <div class="stat-number">${count}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Status</div>
+                    <div class="stat-number">✓</div>
+                </div>
+            `;
+        }
+
+        function executeCustomQuery() {
+            const query = document.getElementById('customQuery').value.trim();
+            if (!query) {
+                alert('Please enter a SQL query');
+                return;
+            }
+           
+            if (!currentDB) {
+                alert('Please first select a database');
+                return;
+            }
+           
+            document.getElementById('dataDisplay').innerHTML = '<div class="loading">Executing query...</div>';
+            document.getElementById('errorMessage').innerHTML = '';
+           
+            fetch(`${API_URL}?action=customQuery&db=${encodeURIComponent(currentDB)}&query=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                   
+                    if (result.length === 0) {
+                        document.getElementById('dataDisplay').innerHTML = '<p>Query executed successfully. No results to display.</p>';
+                    } else {
+                        displayData(result);
+                        document.getElementById('statsGrid').innerHTML = `
+                            <div class="stat-card">
+                                <div class="stat-label">Custom Query</div>
+                                <div class="stat-number">✓</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Database</div>
+                                <div class="stat-number">${currentDB}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Results</div>
+                                <div class="stat-number">${result.length}</div>
+                            </div>
+                        `;
+                        document.getElementById('statsGrid').style.display = 'grid';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('errorMessage').innerHTML = `<div class="error">Query error: ${error.message}</div>`;
+                    document.getElementById('dataDisplay').innerHTML = '';
+                });
+        }
+
+        // Start connection on page load
+        window.onload = connectToServer;
+    </script>
+</body>
+</html>
+```
+```bash
+# Guardar i sortir de nano: Ctrl+O, Enter, Ctrl+X
+```
+
+---
+
+### Pas 3: Creació del fitxer api.php
+
+Creació del fitxer `/var/www/html/api.php` que actua com a backend REST API. Gestiona la connexió amb MySQL (192.168.60.15), implementa endpoints per diferents accions, i inclou mesures de seguretat com validació de consultes.
+
+![Creació api.php](./Photos/sprint%203/web3.png)
+```bash
+# Crear/editar el fitxer api.php
+sudo nano /var/www/html/api.php
+```
+
+**Contingut complet del fitxer api.php:**
+```php
+<?php
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Responder a peticiones OPTIONS (CORS preflight)
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+// Configuración de la base de datos
+$host = '192.168.60.15';
+$user = 'root';
+$pass = '1234';
+$action = $_GET['action'] ?? '';
+
+try {
+    $conn = new mysqli($host, $user, $pass);
+    
+    if ($conn->connect_error) {
+        throw new Exception("Error de conexión: " . $conn->connect_error);
+    }
+    
+    $conn->set_charset("utf8mb4");
+    
+    switch($action) {
+        case 'connect':
+            echo json_encode(['success' => true, 'message' => 'Conectado exitosamente']);
+            break;
+            
+        case 'getDatabases':
+            $result = $conn->query("SHOW DATABASES");
+            $databases = [];
+            while($row = $result->fetch_array()) {
+                $databases[] = $row[0];
+            }
+            echo json_encode($databases);
+            break;
+            
+        case 'getTables':
+            $db = $_GET['db'] ?? '';
+            if (empty($db)) {
+                throw new Exception("No se especificó la base de datos");
+            }
+            $conn->select_db($db);
+            $result = $conn->query("SHOW TABLES");
+            $tables = [];
+            while($row = $result->fetch_array()) {
+                $tables[] = $row[0];
+            }
+            echo json_encode($tables);
+            break;
+            
+        case 'getData':
+            $db = $_GET['db'] ?? '';
+            $table = $_GET['table'] ?? '';
+            if (empty($db) || empty($table)) {
+                throw new Exception("Faltan parámetros: base de datos o tabla");
+            }
+            $conn->select_db($db);
+            $table = $conn->real_escape_string($table);
+            $result = $conn->query("SELECT * FROM `$table` LIMIT 1000");
+            if (!$result) {
+                throw new Exception("Error en la consulta: " . $conn->error);
+            }
+            $data = [];
+            while($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+            echo json_encode($data);
+            break;
+            
+        case 'customQuery':
+            $db = $_GET['db'] ?? '';
+            $query = $_GET['query'] ?? '';
+            if (empty($db) || empty($query)) {
+                throw new Exception("Faltan parámetros: base de datos o consulta");
+            }
+            $conn->select_db($db);
+            $query_upper = strtoupper(trim($query));
+            if (strpos($query_upper, 'SELECT') !== 0) {
+                throw new Exception("Solo se permiten consultas SELECT por seguridad");
+            }
+            $result = $conn->query($query);
+            if (!$result) {
+                throw new Exception("Error en la consulta: " . $conn->error);
+            }
+            $data = [];
+            if ($result instanceof mysqli_result) {
+                while($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            }
+            echo json_encode($data);
+            break;
+            
+        default:
+            throw new Exception("Acción no válida");
+    }
+    
+    $conn->close();
+} catch(Exception $e) {
+    http_response_code(500);
+    echo json_encode(['error' => $e->getMessage()]);
+}
+?>
+```
+```bash
+# Guardar i sortir de nano: Ctrl+O, Enter, Ctrl+X
+```
+
+---
+
+### Pas 4: Configuració de permisos dels fitxers
+
+Configuració dels permisos adequats per als fitxers de l'aplicació web. S'assigna la propietat de `api.php` a l'usuari `www-data` (utilitzat per Apache) i es configuren els permisos correctes.
+
+![Configuració permisos](./Photos/sprint%203/web4.png)
+```bash
+# Assignar propietari a index.html
+sudo chown root:root /var/www/html/index.html
+sudo chmod 644 /var/www/html/index.html
+
+# Assignar propietari a api.php
+sudo chown www-data:www-data /var/www/html/api.php
+sudo chmod 644 /var/www/html/api.php
+
+# Verificar permisos finals
+ls -l /var/www/html/index.html
+ls -l /var/www/html/api.php
+```
+
+---
+
+### Pas 5: Reinici del servei Apache2
+
+Reinici del servei Apache2 per aplicar tots els canvis realitzats i verificació que el servei està actiu correctament.
+
+![Reinici Apache2](./Photos/sprint%203/web5.png)
+```bash
+# Reiniciar Apache2
+sudo systemctl restart apache2
+
+# Verificar estat del servei
+sudo systemctl status apache2
+```
+
+---
+
+## Característiques de l'Aplicació Web
+
+### Funcionalitats Implementades
+
+#### Frontend (index.html)
+- **Interfície moderna** amb gradient dark theme (blau i gris)
+- **Animacions CSS** (fadeIn, slideUp, pulse)
+- **Disseny responsiu** amb grid layout adaptatiu
+- **Indicador d'estat** de connexió amb MySQL en temps real
+- **Selecció dinàmica** de bases de dades i taules
+- **Visualització de dades** en taules HTML amb scroll horitzontal
+- **Consultes SQL personalitzades** amb validació
+- **Estadístiques en temps real** (database, table, total records)
+
+#### Backend (api.php)
+- **Connexió segura** amb MySQL (192.168.60.15:3306)
+- **5 Endpoints REST**: connect, getDatabases, getTables, getData, customQuery
+- **Validació de paràmetres** i gestió d'errors
+- **Protecció SQL injection** amb `real_escape_string()`
+- **Restricció de seguretat**: només permet consultes SELECT
+- **Límit de 1000 registres** per query per evitar sobrecàrrega
+- **Headers CORS** configurats per peticions cross-origin
+- **Resposta JSON** per tots els endpoints
+
+---
+
+## Accés a l'Aplicació Web
+```bash
+# Des del navegador accedir a:
+http://192.168.6.10
+```
+
+**Flux de funcionament:**
+1. L'aplicació es connecta automàticament a MySQL (192.168.60.15)
+2. Es carrega la llista de bases de dades disponibles
+3. L'usuari selecciona una base de dades (ex: EquipamentsBCN)
+4. Es carreguen les taules de la base de dades seleccionada
+5. L'usuari selecciona una taula per visualitzar les dades
+6. Opcionalment, l'usuari pot executar consultes SQL personalitzades
+
+---
+
+## Proves de Funcionament
+
+### Prova 1: Connexió al servidor
+```
+Resultat: ✓ Connected to 192.168.60.15
+```
+
+### Prova 2: Llistat de bases de dades
+```
+Resultat: EquipamentsBCN, information_schema, mysql, performance_schema, sys
+```
+
+### Prova 3: Consulta personalitzada
+```sql
+SELECT nom, latitude, longitude FROM equipaments LIMIT 10
+```
+
+### Prova 4: Validació de seguretat
+```sql
+DELETE FROM equipaments WHERE register_id = '1'
+```
+```
+Resultat: Error "Solo se permiten consultas SELECT por seguridad"
+```
+
+---
