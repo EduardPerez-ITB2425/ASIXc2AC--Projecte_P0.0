@@ -23,6 +23,11 @@
   - [Configuració Web Server (W-N02)](#configuració-web-server-w-n02)
   - [Configuració Database Server (B-N03)](#configuració-database-server-b-n03)
   - [Configuració FTP Server (F-N02)](#configuració-ftp-server-f-n02)
+- [ 3 - Configuració de l'Aplicació Web](#sprint-3---configuració-de-laplicació-web)
+  - [Configuració de l'Aplicació Web](#configuració-de-laplicació-web)
+  - [Característiques de l'Aplicació Web](#característiques-de-laplicació-web)
+  - [Accés a l'Aplicació Web](#accés-a-laplicació-web)
+  - [Proves de Funcionament](#proves-de-funcionament)
 
 ---
 
