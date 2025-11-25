@@ -1,6 +1,6 @@
 # ASIXc2AC--Projecte_P0.0
 
-## 📑 Índex
+## Índex
 
 - [Informació del Projecte](#informació-del-projecte)
 - [Descripció](#descripció)
@@ -2116,7 +2116,7 @@ sudo nano /var/www/html/index.html
 <body>
     <div class="container">
         <div class="header">
-            <h1>Sprint3 - MySQL</h1>
+            <h1>MySQL</h1>
             <p>(Hamza.Tayibi-Eduard.Pérez-Guim.Ballvé-Francesc.Martínez)</p>
         </div>
 
