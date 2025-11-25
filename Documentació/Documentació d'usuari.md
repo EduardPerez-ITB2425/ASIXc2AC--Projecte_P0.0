@@ -5,245 +5,472 @@
 **Versió del Sistema:** 1.0  
 **Data d'Actualització:** Novembre 2025  
 **Equip de Desenvolupament:** Grup 6 - ASIX C2  
+**Membres:** Hamza Tayibi, Eduard Pérez, Guim Ballvé, Francesc Martínez
 
 ---
 
 ## Introducció
 
-Aquest manual està dissenyat per ajudar-lo a utilitzar el sistema de consulta d'equipaments públics de Barcelona. El sistema permet accedir a informació detallada sobre centres educatius, culturals, esportius i altres equipaments públics de la ciutat.
+Aquest manual explica com utilitzar el sistema de consulta d'equipaments públics de Barcelona. El sistema permet accedir a informació detallada sobre centres educatius, culturals, esportius i altres equipaments públics de la ciutat mitjançant una aplicació web.
 
 ---
 
 ## Requisits Mínims
 
 ### Equipament Necessari
-
 - Ordinador amb connexió a Internet
 - Navegador web actualitzat (Chrome, Firefox, Safari o Edge)
 - Connexió de xarxa estable
-
-### Coneixements Previs
-
-No es requereixen coneixements tècnics avançats. Aquest manual explicarà pas a pas com utilitzar el sistema.
+- Resolució mínima de pantalla: 1280x720
 
 ---
 
 ## Accés al Sistema
 
-### Des de la Xarxa Interna (Oficina)
+### Des de la Xarxa Interna
 
 Si es troba connectat a la xarxa interna de l'organització:
 
-1. Obri el seu navegador web preferit
-2. A la barra d'adreces, escrigui: `http://192.168.6.10`
-3. Premi la tecla Enter
+1. Obri el seu navegador web
+2. A la barra d'adreces, escrigui: **http://192.168.6.10**
+3. Premi Enter
+4. La pàgina principal de l'aplicació es carregarà automàticament
 
 ### Des de Casa o Ubicació Externa
 
-Si necessita accedir des de fora de l'oficina, contacti amb el departament de sistemes per obtenir les credencials d'accés remot.
+Per accedir des de fora de l'oficina, contacti amb el departament de sistemes per obtenir:
+- Credencials d'accés VPN
+- Configuració de xarxa necessària
+- Permisos d'accés remot
 
 ---
 
-## Pàgina Principal
+## Interfície de l'Aplicació Web
 
-### Descripció de la Interfície
+### Descripció de la Pàgina Principal
 
-Quan accedeixi al sistema, veurà la pàgina principal amb els següents elements:
+Quan accedeixi al sistema, veurà una interfície amb tema fosc que inclou:
 
-- **Capçalera**: Títol del sistema i logotip
-- **Menú de Navegació**: Opcions per cercar i filtrar equipaments
-- **Àrea de Resultats**: Llista d'equipaments disponibles
-- **Peu de Pàgina**: Informació de contacte i enllaços útils
+#### 1. Capçalera
+- Títol: "Sprint3 - MySQL"
+- Informació de l'equip de desenvolupament
+- Disseny amb gradient blau
 
----
+#### 2. Indicador d'Estat de Connexió
+- Punt verd parpellejant: Sistema connectat correctament
+- Punt vermell: Error de connexió
+- Missatge descriptiu: "Connected to 192.168.60.15" o estat d'error
 
-## Cercar Equipaments
+#### 3. Panell de Control
 
-### Cerca Bàsica
+**a) Selector de Base de Dades**
+- Desplegable amb totes les bases de dades disponibles
+- Opció per defecte: "-- Select a database --"
+- Seleccioni "EquipamentsBCN" per accedir als equipaments de Barcelona
 
-1. Localitzi el camp de cerca a la part superior de la pàgina
-2. Escrigui el nom o tipus d'equipament que cerca (per exemple: "biblioteca", "escola", "poliesportiu")
-3. Faci clic al botó "Cercar" o premi Enter
-4. Els resultats apareixeran a la llista inferior
+**b) Selector de Taula**
+- Disponible després de seleccionar una base de dades
+- Mostra totes les taules disponibles:
+  - `equipaments` - Informació bàsica dels equipaments
+  - `direccions` - Adreces i ubicacions
+  - `valors` - Valors i atributs dels equipaments
+  - `filtres_secundaris` - Categories i filtres
 
-### Filtres Disponibles
+**c) Consulta SQL Personalitzada**
+- Camp de text per escriure consultes SQL
+- Botó "Execute Query" per executar la consulta
+- Només es permeten consultes SELECT per seguretat
 
-El sistema ofereix diferents filtres per refinar la seva cerca:
+#### 4. Panell d'Estadístiques
 
-**Per Tipus d'Equipament:**
-- Centres educatius
-- Biblioteques
-- Centres culturals
-- Instal·lacions esportives
-- Centres cívics
-- Altres equipaments
+Mostra quatre targetes amb informació en temps real:
+- **Database:** Nom de la base de dades activa
+- **Table:** Nom de la taula seleccionada
+- **Total Records:** Nombre total de registres carregats
+- **Status:** Estat de l'última operació
 
-**Per Ubicació:**
-- Seleccioni el districte de Barcelona
-- Seleccioni el barri específic
+#### 5. Àrea de Resultats
 
-**Per Serveis:**
-- Accessibilitat
-- Horari ampliat
-- Connexió WiFi
-- Altres serveis disponibles
-
-### Com Aplicar Filtres
-
-1. Faci clic a la secció "Filtres" al lateral de la pàgina
-2. Marqui les caselles dels filtres que desitgi aplicar
-3. El sistema actualitzarà automàticament els resultats
-4. Per eliminar filtres, desmarqui les caselles corresponents
-
----
-
-## Visualitzar Informació Detallada
-
-### Consultar Fitxa d'Equipament
-
-Per veure informació completa d'un equipament:
-
-1. Faci clic sobre el nom de l'equipament a la llista de resultats
-2. S'obrirà una finestra amb la informació detallada
-
-### Informació Disponible
-
-Cada equipament mostra la següent informació:
-
-**Dades Bàsiques:**
-- Nom de l'equipament
-- Tipus d'equipament
-- Institució responsable
-
-**Ubicació:**
-- Adreça completa
-- Barri i districte
-- Codi postal
-- Coordenades geogràfiques
-
-**Horaris:**
-- Dies d'obertura
-- Horari d'atenció al públic
-- Períodes de tancament
-
-**Serveis:**
-- Llista de serveis disponibles
-- Característiques especials
-- Accessibilitat
-
-**Contacte:**
-- Telèfon
-- Correu electrònic
-- Pàgina web (si està disponible)
+- Taula amb tots els registres de la consulta
+- Scroll horitzontal per columnes extenses
+- Disseny responsiu amb efectes hover
+- Màxim 1000 registres per consulta
 
 ---
 
-## Imprimir o Guardar Informació
+## Utilitzar l'Aplicació Web
 
-### Imprimir Fitxa d'Equipament
+### Pas 1: Connexió Inicial
 
-1. Obri la fitxa de l'equipament que desitja imprimir
-2. Faci clic al botó "Imprimir" a la part superior dreta
-3. Configuri les opcions d'impressió al quadre de diàleg
-4. Faci clic a "Imprimir"
+1. Accedeixi a **http://192.168.6.10**
+2. L'aplicació es connectarà automàticament al servidor MySQL
+3. Espereu fins que l'indicador d'estat mostri: **"Connected to 192.168.60.15"**
+4. El punt indicador canviarà de vermell a verd
 
-### Exportar Resultats
+### Pas 2: Seleccionar Base de Dades
 
-Per guardar una llista de resultats:
+1. Localitzeu el selector **"Select Database"** al Panell de Control
+2. Feu clic sobre el desplegable
+3. Seleccioneu **"EquipamentsBCN"** de la llista
+4. El sistema carregarà automàticament les taules disponibles
 
-1. Després de realitzar la cerca, faci clic a "Exportar"
-2. Seleccioni el format desitjat (PDF, Excel o CSV)
-3. El fitxer es descarregarà automàticament al seu ordinador
+### Pas 3: Seleccionar Taula
 
----
+1. Després de seleccionar la base de dades, el selector **"Select Table"** s'activarà
+2. Feu clic sobre el desplegable de taules
+3. Seleccioneu una de les taules disponibles
+4. Els resultats apareixeran automàticament a la secció "Table Data"
 
-## Preguntes Freqüents
+### Pas 4: Visualitzar Resultats
 
-### La informació està actualitzada?
+**Format de la Taula:**
+- Capçaleres en blau amb el nom de cada columna
+- Files amb fons fosc i efecte hover
+- Text en blanc/gris clar per a fàcil lectura
+- Scroll horitzontal si hi ha moltes columnes
 
-Sí, la base de dades s'actualitza periòdicament amb la informació oficial de l'Ajuntament de Barcelona.
-
-### Puc accedir al sistema des del meu telèfon mòbil?
-
-Sí, el sistema és compatible amb dispositius mòbils. Utilitzi el mateix navegador del seu telèfon i accedeixi a l'adreça indicada.
-
-### Què faig si no trobo l'equipament que cerco?
-
-Verifiqui que ha escrit correctament el nom o proveu amb paraules clau alternatives. Si continua sense trobar-lo, contacti amb el servei d'atenció.
-
-### Puc suggerir millores al sistema?
-
-Sí, enviï els seus comentaris i suggeriments a través del formulari de contacte disponible al peu de pàgina.
-
-### Qui té accés a aquest sistema?
-
-El sistema està disponible per a tots els empleats de l'organització amb connexió a la xarxa interna.
+**Estadístiques Visibles:**
+- Veureu 4 targetes a la part superior amb informació resumida
 
 ---
 
-## Resolució de Problemes Comuns
+## Consultes Bàsiques per Equipaments
 
-### No puc accedir a la pàgina
+### Consulta 1: Veure Tots els Equipaments
 
-**Possibles solucions:**
+**Passos:**
+1. Seleccioneu la base de dades: **EquipamentsBCN**
+2. Seleccioneu la taula: **equipaments**
+3. La taula mostrarà tots els registres disponibles
 
-1. Verifiqui que està connectat a la xarxa
-2. Comprovi que ha escrit correctament l'adreça
-3. Provi amb un navegador diferent
-4. Netegi la memòria cau del navegador
-5. Contacti amb el servei d'assistència tècnica
+**Dades Visibles:**
+- `register_id` - Identificador únic
+- `nom` - Nom de l'equipament
+- `institution_name` - Institució responsable
+- `latitude` / `longitude` - Coordenades GPS
+- `start_date` / `end_date` - Dates de funcionament
+- `timetable` - Horaris
 
-### La pàgina carrega lentament
+### Consulta 2: Veure Adreces d'Equipaments
 
-**Possibles solucions:**
+**Passos:**
+1. Base de dades: **EquipamentsBCN**
+2. Taula: **direccions**
 
-1. Comprovi la velocitat de la seva connexió a Internet
-2. Tanqui pestanyes o aplicacions que no utilitzi
-3. Reiniciï el navegador
-4. Si el problema persisteix, informi al departament tècnic
+**Dades Visibles:**
+- `equipament_id` - Referència a l'equipament
+- `road_name` - Nom del carrer
+- `start_street_number` - Número inicial
+- `neighborhood_name` - Nom del barri
+- `district_name` - Nom del districte
+- `zip_code` - Codi postal
 
-### Els resultats de cerca no són correctes
+### Consulta 3: Veure Atributs dels Equipaments
 
-**Possibles solucions:**
+**Passos:**
+1. Base de dades: **EquipamentsBCN**
+2. Taula: **valors**
 
-1. Revisi els filtres aplicats
-2. Utilitzi paraules clau més generals
-3. Elimini tots els filtres i torni a cercar
-4. Actualitzi la pàgina amb F5
+**Dades Visibles:**
+- `equipament_id` - Referència a l'equipament
+- `category` - Categoria de l'atribut
+- `attribute_name` - Nom de l'atribut
+- `value` - Valor de l'atribut
+- `description` - Descripció detallada
 
-### No es mostra tota la informació
+---
 
-**Possibles solucions:**
+## Consultes SQL Personalitzades
 
-1. Faci scroll cap avall per veure més contingut
-2. Maximitzeu la finestra del navegador
-3. Ajusteu el nivell de zoom del navegador (Ctrl + / Ctrl -)
-4. Verifiqui que el seu navegador està actualitzat
+### Com Executar una Consulta SQL
+
+1. Localitzeu el camp **"Custom SQL Query (optional)"** al Panell de Control
+2. Escriviu la vostra consulta SQL al camp de text
+3. Feu clic al botó **"Execute Query"**
+4. Els resultats apareixeran a la secció "Table Data"
+
+### Exemples de Consultes SQL
+
+#### Exemple 1: Equipaments per Nom
+```sql
+SELECT nom, institution_name, latitude, longitude 
+FROM equipaments 
+WHERE nom LIKE '%biblioteca%'
+```
+
+Mostra tots els equipaments que continguin "biblioteca" al nom.
+
+#### Exemple 2: Equipaments per Districte
+```sql
+SELECT e.nom, d.district_name, d.neighborhood_name, d.road_name
+FROM equipaments e
+JOIN direccions d ON e.register_id = d.equipament_id
+WHERE d.district_name = 'Eixample'
+```
+
+Mostra equipaments del districte de l'Eixample amb la seva adreça.
+
+#### Exemple 3: Equipaments amb Coordenades
+```sql
+SELECT nom, latitude, longitude, timetable
+FROM equipaments
+WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+LIMIT 50
+```
+
+Mostra els primers 50 equipaments amb coordenades GPS i horaris.
+
+#### Exemple 4: Recompte per Barri
+```sql
+SELECT d.neighborhood_name, COUNT(*) as total_equipaments
+FROM direccions d
+GROUP BY d.neighborhood_name
+ORDER BY total_equipaments DESC
+LIMIT 10
+```
+
+Mostra els 10 barris amb més equipaments.
+
+#### Exemple 5: Equipaments amb Filtres Específics
+```sql
+SELECT e.nom, f.filter_name, f.filter_tree
+FROM equipaments e
+JOIN filtres_secundaris f ON e.register_id = f.equipament_id
+WHERE f.filter_name LIKE '%educació%'
+```
+
+Mostra equipaments relacionats amb educació.
+
+### Restriccions de Seguretat
+
+**Important:**
+- Només es permeten consultes **SELECT**
+- Les consultes INSERT, UPDATE, DELETE, DROP estan bloquejades
+- Missatge d'error: "Solo se permiten consultas SELECT por seguridad"
+- Límit màxim de resultats: **1000 registres**
+
+### Consells per a Consultes Eficients
+
+**Bones Pràctiques:**
+- Utilitzeu `LIMIT` per limitar el nombre de resultats
+- Especifiqueu només les columnes necessàries
+- Utilitzeu `WHERE` per filtrar resultats
+- Utilitzeu `JOIN` per combinar taules relacionades
+
+**Eviteu:**
+- Consultes sense `LIMIT` que retornin milers de registres
+- Utilitzar `SELECT *` si no necessiteu totes les columnes
+- Consultes amb múltiples `JOIN` complexos
+
+---
+
+## Característiques de la Interfície
+
+### Disseny Visual
+
+**Colors i Tema:**
+- Fons amb gradient fosc (blau nit)
+- Accent principal: Blau
+- Text: Blanc/gris clar per contrast òptim
+- Targetes amb efectes de vidre esmerilat
+
+**Animacions:**
+- Efecte "fade in" a l'entrada de la pàgina
+- Efecte "slide up" als panells de control i dades
+- Pulsació suau de l'indicador d'estat
+- Efecte hover a les files de la taula
+- Transicions suaus a botons i selectors
+
+### Compatibilitat
+
+**Navegadors Compatible:**
+- Google Chrome (versió 90+)
+- Mozilla Firefox (versió 88+)
+- Microsoft Edge (versió 90+)
+- Safari (versió 14+)
+
+**Dispositius:**
+- Ordinadors de sobretaula
+- Portàtils
+- Tauletes (experiència limitada)
+- Telèfons mòbils (no optimitzat)
 
 ---
 
 ## Consells d'Ús
 
-### Optimitzar les Cerques
+### Optimitzar el Rendiment
 
-- Utilitzi paraules clau específiques
-- Combini diferents filtres per resultats més precisos
-- Guardi els equipaments que consulti freqüentment
-- Utilitzi cometes per cercar frases exactes
+1. **Utilització de Filtres:**
+   - Utilitzeu `WHERE` a les consultes SQL per reduir resultats
+   - Seleccioneu només les columnes necessàries
+   - Apliqueu `LIMIT` per consultes exploratòries
 
-### Mantenir la Seguretat
+2. **Navegació Eficient:**
+   - Mantingueu obertes només les pestanyes necessàries
+   - Refresqueu la pàgina (F5) si detecteu lentitud
+   - Utilitzeu les dreceres de teclat per agilitzar tasques
 
-- No compartiu les credencials d'accés
-- Tanqueu la sessió quan acabeu de treballar
-- No deixeu l'ordinador desatès amb la sessió oberta
-- Informi immediatament de qualsevol activitat sospitosa
+3. **Interpretació de Resultats:**
+   - Reviseu les estadístiques abans de la taula de dades
+   - Utilitzeu el scroll horitzontal per columnes ocultes
+   - Observeu els canvis de color hover per identificar files
 
 ### Bones Pràctiques
 
-- Actualitzeu el navegador regularment
-- Utilitzeu una connexió segura
-- Verifiqueu la informació important abans d'utilitzar-la
-- Reporteu errors o inconsistències a la informació
+**Recomanacions:**
+- Començeu amb consultes simples i augmenteu la complexitat gradualment
+- Guardeu les consultes SQL útils en un document extern
+- Utilitzeu noms de columna específics en lloc de `SELECT *`
+- Comproveu l'indicador d'estat abans de fer consultes
+
+**Eviteu:**
+- Executar consultes molt complexes sense testejar-les primer
+- Deixar la sessió oberta sense supervisió
+- Intentar executar consultes que modifiquin dades
+- Obrir múltiples pestanyes amb la mateixa aplicació
+
+---
+
+## Resolució de Problemes
+
+### Problema 1: No puc accedir a la pàgina
+
+**Símptomes:**
+- El navegador no carrega la pàgina
+- Missatge "No es pot arribar al lloc"
+- Temps d'espera esgotat
+
+**Solucions:**
+1. Verifiqueu que està connectat a la xarxa interna
+2. Comprovi que ha escrit correctament l'adreça: `http://192.168.6.10`
+3. Provi amb un navegador diferent
+4. Netegi la memòria cau del navegador (Ctrl + Shift + Delete)
+5. Contacti amb el servei d'assistència tècnica
+
+### Problema 2: Indicador d'estat en vermell
+
+**Símptomes:**
+- El punt indicador està en vermell
+- Missatge: "Error: Connection error"
+- No es carreguen les bases de dades
+
+**Solucions:**
+1. Refresqueu la pàgina (F5)
+2. Espereu 30 segons i torneu a intentar-ho
+3. Comproveu que el servidor MySQL està actiu
+4. Verifiqueu la connectivitat de xarxa
+5. Si persisteix, reporteu l'incidència
+
+### Problema 3: La taula no mostra resultats
+
+**Símptomes:**
+- Missatge: "No data in this table"
+- La taula està buida després de seleccionar-la
+- Les estadístiques mostren 0 registres
+
+**Solucions:**
+1. Verifiqueu que ha seleccionat la base de dades correcta
+2. Proveu amb una taula diferent
+3. Executeu una consulta SQL simple: `SELECT * FROM equipaments LIMIT 10`
+4. Comproveu que la taula conté dades al servidor
+
+### Problema 4: Error en consulta SQL personalitzada
+
+**Símptomes:**
+- Missatge d'error vermell: "Query error: ..."
+- La consulta no s'executa
+- Resultats inesperats
+
+**Causes i Solucions:**
+
+**Error de Sintaxi:**
+```
+Missatge: "You have an error in your SQL syntax"
+Solució: Reviseu la sintaxi SQL, comproveu parèntesis, comes i cometes
+```
+
+**Consulta No Permesa:**
+```
+Missatge: "Solo se permiten consultas SELECT por seguridad"
+Solució: Utilitzeu només consultes SELECT, no INSERT/UPDATE/DELETE
+```
+
+**Taula o Columna No Existent:**
+```
+Missatge: "Unknown column 'xxx' in 'field list'"
+Solució: Verifiqueu els noms de columnes i taules correctes
+```
+
+**Temps d'Espera Esgotat:**
+```
+Missatge: "Query timeout"
+Solució: Simplifiqueu la consulta, afegiu LIMIT
+```
+
+### Problema 5: La pàgina carrega lentament
+
+**Símptomes:**
+- Temps de càrrega superior a 10 segons
+- La taula triga a mostrar-se
+- Navegador lent o bloquejat
+
+**Solucions:**
+1. Reduïu el nombre de resultats amb `LIMIT`
+2. Tanqueu pestanyes i aplicacions que no utilitzi
+3. Comproveu la velocitat de connexió a Internet
+4. Eviteu consultes amb múltiples `JOIN` complexos
+5. Reinicieu el navegador
+6. Netegeu la memòria cau
+
+### Problema 6: Missatges d'error genèrics
+
+**Símptomes:**
+- Missatge: "Error loading data"
+- Missatge: "Error loading tables"
+- La interfície no respon
+
+**Solucions:**
+1. Refresqueu la pàgina completament (Ctrl + F5)
+2. Obriu les eines de desenvolupador (F12) i reviseu la consola
+3. Proveu amb un navegador diferent
+4. Desactiveu extensions del navegador que puguin interferir
+5. Contacteu amb suport tècnic amb captures de pantalla
+
+---
+
+## Seguretat i Privadesa
+
+### Mesures de Seguretat Implementades
+
+1. **Validació de Consultes:**
+   - Només es permeten consultes SELECT
+   - Protecció contra SQL Injection
+   - Escapament de caràcters especials
+
+2. **Límits de Dades:**
+   - Màxim 1000 registres per consulta
+   - Timeout de connexió configurat
+   - Control d'errors robust
+
+3. **Accés Restringit:**
+   - Només accessible des de la xarxa interna
+   - Connexió directa sense autenticació externa
+   - Logs de consultes al servidor
+
+### Recomanacions de Seguretat
+
+**Feu:**
+- Tancau la pestanya quan acabeu de treballar
+- No compartiu pantalles amb informació sensible
+- Informeu d'errors o comportaments estranys
+- Utilitzeu connexions segures de xarxa
+
+**No Feu:**
+- Intentar modificar o eliminar dades
+- Compartir captures amb dades sensibles
+- Executar consultes no verificades de tercers
+- Deixar la sessió oberta sense supervisió
 
 ---
 
@@ -251,105 +478,432 @@ El sistema està disponible per a tots els empleats de l'organització amb conne
 
 ### Servei d'Assistència Tècnica
 
-Per a problemes tècnics o consultes sobre el sistema:
-
-**Horari d'atenció:**
+**Horari d'Atenció:**
 - Dilluns a Divendres: 9:00 - 18:00
 - Cap de setmana i festius: Tancat
 
-**Canals de contacte:**
+**Canals de Contacte:**
 - Telèfon intern: Extensió 1234
-- Correu electrònic: exemple@exemple.cat
+- Correu electrònic: suport@grup6.itb.cat
 - Portal d'incidències: http://suport.intern
 
 ### Temps de Resposta
 
-- Incidències crítiques: 2 hores
-- Incidències normals: 24 hores
-- Consultes generals: 48 hores
+| Tipus d'Incidència | Temps de Resposta |
+|-------------------|-------------------|
+| Crítica (sistema caigut) | 2 hores |
+| Normal (errors de consulta) | 24 hores |
+| Consulta general | 48 hores |
 
 ### Informació a Proporcionar
 
-Quan contacti amb l'assistència tècnica, proporcioni:
+Quan contacteu amb assistència tècnica, incloeu:
 
-1. Nom complet i departament
-2. Descripció detallada del problema
-3. Missatges d'error (si n'hi ha)
-4. Navegador i sistema operatiu utilitzat
-5. Captures de pantalla (si és possible)
+1. **Informació Bàsica:**
+   - Nom complet i departament
+   - Data i hora de l'incident
+   - Descripció detallada del problema
+
+2. **Informació Tècnica:**
+   - Navegador i versió
+   - Sistema operatiu
+   - IP de la màquina (si és possible)
+
+3. **Evidències:**
+   - Captura de pantalla de l'error
+   - Consulta SQL que va fallar (si escau)
+   - Missatges d'error complets
+   - Passos per reproduir el problema
 
 ---
 
 ## Glossari de Termes
 
-**Cercador**: Eina que permet trobar informació específica al sistema.
+| Terme | Definició |
+|-------|-----------|
+| **API** | Interfície que permet la comunicació entre el frontend i el backend |
+| **Backend** | Part del sistema que gestiona la lògica i les dades (api.php) |
+| **Base de Dades** | Conjunt organitzat d'informació estructurada (MySQL) |
+| **Consulta SQL** | Instrucció per obtenir dades d'una base de dades |
+| **Dashboard** | Panell de control visual amb informació resumida |
+| **Endpoint** | Punt d'accés específic de l'API |
+| **Frontend** | Part visual de l'aplicació que veu l'usuari (index.html) |
+| **Interfície** | Conjunt d'elements visuals per interactuar amb el sistema |
+| **JOIN** | Operació SQL per combinar dades de múltiples taules |
+| **LIMIT** | Restricció del nombre de resultats d'una consulta |
+| **MySQL** | Sistema de gestió de bases de dades utilitzat |
+| **Query** | Consulta o petició de dades |
+| **SELECT** | Instrucció SQL per consultar dades |
+| **Taula** | Estructura que emmagatzema dades en files i columnes |
+| **WHERE** | Clàusula SQL per filtrar resultats |
 
-**Filtre**: Criteri que permet refinar els resultats de cerca.
+---
 
-**Equipament**: Edifici o instal·lació pública de la ciutat de Barcelona.
+## Casos d'Ús Pràctics
 
-**Districte**: Divisió administrativa de la ciutat de Barcelona.
+### Cas d'Ús 1: Cercar Biblioteques a Gràcia
 
-**Barri**: Subdivisió d'un districte de Barcelona.
+**Objectiu:** Trobar totes les biblioteques del barri de Gràcia amb les seves adreces.
 
-**Exportar**: Acció de guardar informació en un fitxer extern.
+**Passos:**
+1. Accediu a l'aplicació web
+2. Seleccioneu base de dades: **EquipamentsBCN**
+3. Al camp "Custom SQL Query", escriviu:
+```sql
+SELECT e.nom, d.road_name, d.start_street_number, d.neighborhood_name
+FROM equipaments e
+JOIN direccions d ON e.register_id = d.equipament_id
+WHERE e.nom LIKE '%biblioteca%' 
+  AND d.district_name = 'Gràcia'
+```
+4. Feu clic a "Execute Query"
+5. Visualitzeu els resultats a la taula
 
-**Navegador**: Programa utilitzat per accedir a pàgines web (Chrome, Firefox, etc.).
+### Cas d'Ús 2: Equipaments Esportius amb Horaris
 
-**URL**: Adreça web que s'escriu a la barra del navegador.
+**Objectiu:** Consultar tots els centres esportius amb els seus horaris d'obertura.
 
-**Sessió**: Període de temps durant el qual un usuari està connectat al sistema.
+**Passos:**
+1. Base de dades: **EquipamentsBCN**
+2. Consulta SQL:
+```sql
+SELECT nom, institution_name, timetable, latitude, longitude
+FROM equipaments
+WHERE nom LIKE '%esportiu%' OR nom LIKE '%poliesportiu%'
+  AND timetable IS NOT NULL
+LIMIT 50
+```
+3. Execute Query
+4. Analitzeu els horaris a la columna `timetable`
 
-**Interfície**: Conjunt d'elements visuals que permeten interactuar amb el sistema.
+### Cas d'Ús 3: Estadístiques per Districte
+
+**Objectiu:** Obtenir un resum del nombre d'equipaments per districte.
+
+**Passos:**
+1. Base de dades: **EquipamentsBCN**
+2. Consulta SQL:
+```sql
+SELECT d.district_name, COUNT(*) as total_equipaments
+FROM direccions d
+GROUP BY d.district_name
+ORDER BY total_equipaments DESC
+```
+3. Execute Query
+4. Reviseu les estadístiques al panell superior
+
+---
+
+## Tutorial Pas a Pas per a Nous Usuaris
+
+### Primera Vegada: Guia Completa
+
+#### Pas 1: Accés Inicial (2 minuts)
+
+1. Obriu el vostre navegador
+2. Escriviu a la barra d'adreces: `http://192.168.6.10`
+3. Premeu Enter i espereu la càrrega
+4. Heu de veure la capçalera "Sprint3 - MySQL"
+
+#### Pas 2: Comprensió de la Interfície (3 minuts)
+
+1. **Observeu la part superior:**
+   - Títol de l'aplicació amb gradient blau
+   - Noms de l'equip de desenvolupament
+
+2. **Indicador d'estat:**
+   - Espereu que el punt canviï de vermell a verd
+   - Llegiu el missatge: "Connected to 192.168.60.15"
+
+3. **Panell de Control:**
+   - Identifiqueu els 3 elements principals
+
+#### Pas 3: Primera Consulta Simple (5 minuts)
+
+1. **Seleccionar Base de Dades:**
+   - Feu clic al primer desplegable
+   - Seleccioneu: **EquipamentsBCN**
+   - Espereu 1-2 segons
+
+2. **Seleccionar Taula:**
+   - El segon desplegable ara estarà actiu
+   - Seleccioneu: **equipaments**
+   - Els resultats es carregaran automàticament
+
+3. **Analitzar Resultats:**
+   - Mireu les 4 targetes superiors amb estadístiques
+   - Desplaceu-vos cap avall per veure la taula de dades
+
+#### Pas 4: Consulta SQL Personalitzada (10 minuts)
+
+1. **Exemple Bàsic:**
+   - Feu clic al camp "Custom SQL Query"
+   - Escriviu:
+```sql
+SELECT nom, latitude, longitude FROM equipaments LIMIT 10
+```
+   - Premeu "Execute Query"
+
+2. **Exemple amb Filtre:**
+   - Netegeu el camp anterior
+   - Escriviu:
+```sql
+SELECT nom, institution_name 
+FROM equipaments 
+WHERE nom LIKE '%cultura%'
+```
+   - Execute Query
+
+3. **Exemple amb JOIN:**
+   - Nova consulta:
+```sql
+SELECT e.nom, d.road_name, d.neighborhood_name
+FROM equipaments e
+JOIN direccions d ON e.register_id = d.equipament_id
+LIMIT 20
+```
+   - Execute Query
+
+#### Pas 5: Exportar/Guardar Informació (5 minuts)
+
+1. **Copiar Resultats:**
+   - Seleccioneu les files que us interessin
+   - Ctrl + C per copiar
+   - Enganxeu a Excel o un document
+
+2. **Captura de Pantalla:**
+   - Windows: Win + Shift + S
+   - Mac: Cmd + Shift + 4
+   - Guardeu la imatge amb els resultats
+
+---
+
+## Dreceres de Teclat
+
+### Navegació General
+
+| Drecera | Acció |
+|---------|-------|
+| `F5` | Refrescar pàgina |
+| `Ctrl + F5` | Refrescar ignorant cau |
+| `Ctrl + F` | Cercar text a la pàgina |
+| `Ctrl + +` | Augmentar zoom |
+| `Ctrl + -` | Reduir zoom |
+| `Ctrl + 0` | Zoom 100% |
+| `F12` | Obrir eines de desenvolupador |
+| `Ctrl + Shift + Delete` | Netejar cau del navegador |
+
+### Edició de Consultes SQL
+
+| Drecera | Acció |
+|---------|-------|
+| `Ctrl + A` | Seleccionar tot el text |
+| `Ctrl + C` | Copiar text seleccionat |
+| `Ctrl + V` | Enganxar text |
+| `Ctrl + X` | Tallar text |
+| `Ctrl + Z` | Desfer acció |
+| `Tab` | Indentar text SQL |
+
+---
+
+## Exemples Avançats de Consultes
+
+### Consulta Complexa 1: Equipaments amb Múltiples Filtres
+```sql
+SELECT 
+    e.nom,
+    e.institution_name,
+    d.district_name,
+    d.neighborhood_name,
+    d.road_name,
+    d.zip_code,
+    e.latitude,
+    e.longitude
+FROM equipaments e
+INNER JOIN direccions d ON e.register_id = d.equipament_id
+WHERE 
+    d.district_name IN ('Eixample', 'Gràcia', 'Sarrià-Sant Gervasi')
+    AND e.latitude IS NOT NULL
+    AND e.longitude IS NOT NULL
+ORDER BY d.district_name, e.nom
+LIMIT 100
+```
+
+### Consulta Complexa 2: Anàlisi per Categories
+```sql
+SELECT 
+    f.filter_name as categoria,
+    COUNT(DISTINCT e.register_id) as total_equipaments,
+    COUNT(DISTINCT d.district_name) as districtes_amb_equipaments
+FROM equipaments e
+JOIN filtres_secundaris f ON e.register_id = f.equipament_id
+JOIN direccions d ON e.register_id = d.equipament_id
+GROUP BY f.filter_name
+HAVING total_equipaments > 5
+ORDER BY total_equipaments DESC
+```
+
+### Consulta Complexa 3: Equipaments amb Atributs Específics
+```sql
+SELECT 
+    e.nom,
+    e.institution_name,
+    v.attribute_name,
+    v.value,
+    v.description
+FROM equipaments e
+JOIN valors v ON e.register_id = v.equipament_id
+WHERE 
+    v.attribute_name LIKE '%accés%'
+    OR v.attribute_name LIKE '%discapacitat%'
+ORDER BY e.nom
+LIMIT 50
+```
+
+---
+
+## Preguntes Freqüents
+
+### Generals
+
+**P: Puc utilitzar l'aplicació des de casa?**  
+R: No, l'aplicació només és accessible des de la xarxa interna. Contacteu amb IT per obtenir accés VPN si necessiteu treballar remotament.
+
+**P: És necessari registrar-se o iniciar sessió?**  
+R: No, l'aplicació no requereix autenticació ja que està protegida a nivell de xarxa.
+
+**P: Quantes consultes puc fer simultàniament?**  
+R: Podeu executar una consulta a la vegada. Espereu que es completi abans d'executar la següent.
+
+**P: On puc trobar exemples de consultes SQL?**  
+R: Al mateix manual, secció "Consultes SQL Personalitzades" i "Exemples Avançats de Consultes".
+
+### Tècniques
+
+**P: Per què no puc executar consultes INSERT o UPDATE?**  
+R: Per motius de seguretat, només es permeten consultes SELECT. La base de dades és de només lectura per als usuaris web.
+
+**P: Quin és el límit màxim de resultats?**  
+R: El sistema retorna un màxim de 1000 registres per consulta. Utilitzeu `LIMIT` per controlar el nombre de resultats.
+
+**P: Com puc exportar els resultats a Excel?**  
+R: Seleccioneu les files desitjades a la taula, copieu-les (Ctrl+C) i enganxeu-les directament a Excel.
+
+**P: Puc guardar les meves consultes SQL?**  
+R: L'aplicació no té funcionalitat de desar consultes. Es recomana mantenir un document extern amb les consultes més utilitzades.
+
+### Dades
+
+**P: Amb quina freqüència s'actualitzen les dades?**  
+R: Les dades s'actualitzen periòdicament segons les fonts oficials de l'Ajuntament de Barcelona. Consulteu amb IT per conèixer l'última actualització.
+
+**P: Per què alguns equipaments no tenen coordenades GPS?**  
+R: No tots els equipaments de la base de dades original tenen informació de geolocalització completa.
+
+**P: Com interpreto els horaris (timetable)?**  
+R: El camp `timetable` conté text lliure amb els horaris. Pot incloure dies, hores i excepcions.
+
+**P: Què significa NULL a les dades?**  
+R: NULL indica que no hi ha informació disponible per a aquell camp específic.
 
 ---
 
 ## Annexos
 
-### Annex A: Llista de Navegadors Compatible
+### Annex A: Estructura de la Base de Dades
 
-El sistema funciona correctament amb les versions actualitzades de:
+#### Taula: equipaments
+| Camp | Tipus | Descripció |
+|------|-------|------------|
+| register_id | VARCHAR(50) | Identificador únic PK |
+| nom | VARCHAR(255) | Nom de l'equipament |
+| institution_id | VARCHAR(50) | ID de la institució |
+| institution_name | VARCHAR(255) | Nom de la institució |
+| created | TIMESTAMP | Data de creació |
+| modified | TIMESTAMP | Darrera modificació |
+| geo_x | FLOAT | Coordenada X |
+| geo_y | FLOAT | Coordenada Y |
+| latitude | FLOAT | Latitud GPS |
+| longitude | FLOAT | Longitud GPS |
+| estimated_dates | VARCHAR(100) | Dates estimades |
+| start_date | DATE | Data inici |
+| end_date | DATE | Data final |
+| timetable | TEXT | Horaris |
 
-- Google Chrome (versió 90 o superior)
-- Mozilla Firefox (versió 88 o superior)
-- Microsoft Edge (versió 90 o superior)
-- Safari (versió 14 o superior)
+#### Taula: direccions
+| Camp | Tipus | Descripció |
+|------|-------|------------|
+| equipament_id | VARCHAR(50) | FK a equipaments |
+| roadtype_name | VARCHAR(100) | Tipus de via |
+| road_name | VARCHAR(255) | Nom del carrer |
+| start_street_number | VARCHAR(10) | Número inicial |
+| neighborhood_name | VARCHAR(100) | Nom del barri |
+| district_name | VARCHAR(100) | Nom del districte |
+| zip_code | VARCHAR(10) | Codi postal |
+| town | VARCHAR(100) | Població |
+
+#### Taula: valors
+| Camp | Tipus | Descripció |
+|------|-------|------------|
+| equipament_id | VARCHAR(50) | FK a equipaments |
+| attribute_id | VARCHAR(50) | ID de l'atribut |
+| category | VARCHAR(100) | Categoria |
+| attribute_name | VARCHAR(100) | Nom de l'atribut |
+| value | VARCHAR(255) | Valor |
+| description | TEXT | Descripció |
+
+#### Taula: filtres_secundaris
+| Camp | Tipus | Descripció |
+|------|-------|------------|
+| equipament_id | VARCHAR(50) | FK a equipaments |
+| filter_id | VARCHAR(50) | ID del filtre |
+| filter_name | VARCHAR(255) | Nom del filtre |
+| filter_fullpath | TEXT | Ruta completa |
+| filter_tree | VARCHAR(255) | Arbre de categories |
 
 ### Annex B: Codis d'Error Comuns
 
-**Error 404 - Pàgina no trobada**
-- Causa: L'adreça escrita no és correcta
-- Solució: Verifiqui l'URL i torni a intentar-ho
+| Codi | Missatge | Causa | Solució |
+|------|----------|-------|---------|
+| 404 | Page not found | URL incorrecta | Verificar http://192.168.6.10 |
+| 500 | Internal server error | Error al servidor | Contactar amb IT |
+| 1064 | SQL syntax error | Sintaxi SQL incorrecta | Revisar consulta SQL |
+| 1146 | Table doesn't exist | Taula no existent | Verificar nom de taula |
+| 1054 | Unknown column | Columna no existent | Verificar nom de columna |
+| Connection timeout | Temps d'espera | Servidor no respon | Refrescar i reintentar |
 
-**Error 500 - Error del servidor**
-- Causa: Problema tècnic al servidor
-- Solució: Esperi uns minuts i torni a intentar-ho. Si persisteix, contacti amb suport
+### Annex C: Compatibilitat de Navegadors
 
-**Error de connexió**
-- Causa: No hi ha connexió a la xarxa
-- Solució: Verifiqui la seva connexió a Internet
-
-### Annex C: Dreceres de Teclat
-
-Per facilitar la navegació:
-
-- **Ctrl + F**: Cercar text a la pàgina
-- **Ctrl + P**: Imprimir pàgina
-- **F5**: Actualitzar pàgina
-- **Ctrl + (+)**: Augmentar zoom
-- **Ctrl + (-)**: Reduir zoom
-- **Ctrl + 0**: Restablir zoom
+| Navegador | Versió Mínima | Versió Recomanada | Suport |
+|-----------|---------------|-------------------|---------|
+| Chrome | 90 | 120+ | Complet |
+| Firefox | 88 | 115+ | Complet |
+| Edge | 90 | 120+ | Complet |
+| Safari | 14 | 17+ | Complet |
+| Opera | 75 | 100+ | Limitat |
+| Internet Explorer | - | - | No suportat |
 
 ---
 
 ## Notes Finals
 
-Aquest manual està subjecte a actualitzacions periòdiques. Consulteu la versió més recent al portal intern de documentació.
+### Actualitzacions del Manual
 
-Per a qualsevol dubte o suggeriment sobre aquest manual, contacti amb el departament de sistemes.
+Aquest manual està subjecte a actualitzacions periòdiques. Consulteu sempre la versió més recent disponible al portal intern de documentació.
 
-**Última revisió:** Novembre 2025  
-**Versió del document:** 1.0  
-**Propera revisió prevista:** Març 2026
+- **URL Interna:** http://docs.intern/manuals/aplicacio-web
+- **Versió Actual:** 1.0
+- **Data Última Revisió:** Novembre 2025
+- **Propera Revisió Prevista:** Març 2026
+
+### Feedback i Millores
+
+Per enviar suggeriments, correccions o preguntes:
+
+- Email: suport@grup6.itb.cat
+- Formulari de feedback: http://feedback.intern
 
 ---
+
+Grup 6 - ASIX | Institut Tecnològic de Barcelona  
+Hamza Tayibi, Eduard Pérez, Guim Ballvé, Francesc Martínez
