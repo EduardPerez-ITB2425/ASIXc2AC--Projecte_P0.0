@@ -1533,7 +1533,7 @@ CREATE TABLE filtres_secundaris (
 
 #### Pas 6: Verificació de les taules creades
 
-Execució de la comanda `SHOW TABLES;` a MySQL mostrant les 4 taules creades correctament a la base de dades EquipamentsBCN: direccions, equipaments, filtres_secundaris i valors. El resultat mostra "4 rows in set (0,01 sec)".
+Execució de la comanda `SHOW TABLES;` a MySQL mostrant les 4 taules creades correctament a la base de dades EquipamentsBARNA: direccions, equipaments, filtres_secundaris i valors. El resultat mostra "4 rows in set (0,01 sec)".
 
 ![Verificació taules MySQL](./Photos/sprint%202/BBDD/BBDD6.png)
 ```sql
@@ -2578,7 +2578,7 @@ https://192.168.6.10
 **Flux de funcionament:**
 1. L'aplicació es connecta automàticament a MySQL (192.168.60.15)
 2. Es carrega la llista de bases de dades disponibles
-3. L'usuari selecciona una base de dades (ex: EquipamentsBCN)
+3. L'usuari selecciona una base de dades (ex: EquipamentsBARNA)
 4. Es carreguen les taules de la base de dades seleccionada
 5. L'usuari selecciona una taula per visualitzar les dades
 6. Opcionalment, l'usuari pot executar consultes SQL personalitzades
@@ -2599,7 +2599,7 @@ Resultat: EquipamentsBARNA, information_schema, mysql, performance_schema, sys
 
 ### Prova 3: Consulta personalitzada
 ```sql
-SELECT nom, latitude, longitude FROM equipaments LIMIT 10
+SELECT nom, latitude, longitude FROM EquipamentsBARNA LIMIT 10
 ```
 
 ### Prova 4: Validació de seguretat
