@@ -196,14 +196,14 @@ Aquesta segmentació proporciona **aïllament lògic** entre les diferents zones
 - **Justificació**:
   - **Flexibilitat**: Els usuaris no necessiten coneixements tècnics de xarxa
   - **Mobilitat**: Els dispositius poden canviar d'ubicació sense reconfiguració
-  - **Gestió centralitzada**: Tots els canvis es realitzen al servidor DHCP
+  - **Gestió centralitzada**: Tots els canvis es realitzen al servidor DHCP 
   - Diversitat de sistemes operatius per simular un entorn real d'oficina
 
 ---
 
 ### Selecció de Sistemes Operatius
 
-#### Per què Ubuntu 22.04 Desktop en lloc de Server?
+#### Per què Ubuntu 22.04 Desktop?
 
 **Avantatges per al projecte:**
 
@@ -212,6 +212,19 @@ Aquesta segmentació proporciona **aïllament lògic** entre les diferents zones
 3. **Mateix conjunt de paquets**: Ubuntu Desktop inclou tots els paquets de Server amb interfície addicional
 4. **Flexibilitat de configuració**: Més senzill alternar entre mode gràfic i línia de comandes
 5. **Entorn de proves**: Ideal per a entorns educatius on es necessita visualitzar el que passa
+6. **Corba d'aprenentatge**: Més accessible per a usuaris amb menys experiència en administració de sistemes Linux
+
+**Millores per a futurs projectes:**
+
+Tot i que Ubuntu Desktop ha funcionat correctament per a aquest projecte, en futures implementacions s'utilitzarà **Ubuntu Server 22.04** per les següents raons:
+
+- **Menor consum de recursos**: Sense entorn gràfic, allibera RAM i CPU per als serveis
+- **Millor rendiment**: Més recursos disponibles per a Apache, MySQL i PHP
+- **Seguretat millorada**: Menys superfície d'atac al no tenir components gràfics
+- **Bones pràctiques**: Reflecteix millor els entorns de producció reals
+- **Estabilitat**: Menys processos en execució redueix possibles conflictes
+
+La transició a Ubuntu Server permetrà optimitzar l'infraestructura i apropar-se més a un entorn professional.
 
 **Per què no Debian 13 Server?**
 
@@ -220,13 +233,6 @@ Tot i que Debian és més lleuger i estable:
 - Cicles de suport LTS (22.04) amb 5 anys de manteniment
 - Més familiaritat de l'equip amb l'ecosistema Ubuntu
 - Repositories més actualitzats per a paquets com PHP i MySQL
-
-**Per què no Ubuntu 24.04?**
-
-- La versió 22.04 LTS ofereix més estabilitat provada
-- Millor compatibilitat amb documentació existent
-- Menys problemes potencials amb paquets i dependències
-- Suport estès fins 2027
 
 #### Per què Windows 11 per al client?
 
@@ -264,8 +270,7 @@ Un router dedicat (pfSense, OpenWrt) seria més eficient en producció, però me
 1. **Segmentació en capes**: Internet → DMZ → Intranet
 2. **Principi de mínim privilegi**: Cada zona té accés limitat a les altres
 3. **Protecció de dades**: Base de dades inaccessible des d'Internet
-4. **Punt únic de control**: El router R-N01 gestiona tot el trànsit entre zones
-5. **Regles iptables específiques**: Port forwarding només per MySQL (3306) des de Web a Database
+4. **Regles iptables específiques**: Port forwarding només per MySQL (3306) des de Web a Database
 
 #### Escalabilitat
 - Fàcil afegir nous servidors a la DMZ o Intranet
